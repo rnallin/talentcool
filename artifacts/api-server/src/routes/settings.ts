@@ -1,17 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db, companySettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { UpdateCompanySettingsBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
-
-async function getSettingValue(key: string, fallback: string): Promise<string> {
-  const [row] = await db
-    .select()
-    .from(companySettingsTable)
-    .where(eq(companySettingsTable.key, key))
-    .limit(1);
-  return row?.value ?? fallback;
-}
 
 async function getSettingsObject() {
   const rows = await db.select().from(companySettingsTable);
@@ -21,6 +13,16 @@ async function getSettingsObject() {
     workingDaysPerMonth: parseInt(map.working_days_per_month ?? "22"),
     companyName: map.company_name ?? "Empresa Demo",
   };
+}
+
+async function upsertSetting(key: string, value: string): Promise<void> {
+  await db
+    .insert(companySettingsTable)
+    .values({ key, value })
+    .onConflictDoUpdate({
+      target: companySettingsTable.key,
+      set: { value, updatedAt: new Date() },
+    });
 }
 
 router.get("/settings", async (req, res) => {
@@ -33,37 +35,33 @@ router.get("/settings", async (req, res) => {
 });
 
 router.patch("/settings", async (req, res) => {
+  const parsed = UpdateCompanySettingsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+
   try {
-    const body = req.body as {
-      chargesRate?: number;
-      workingDaysPerMonth?: number;
-      companyName?: string;
-    };
+    const { chargesRate, workingDaysPerMonth, companyName } = parsed.data;
 
-    const updates: { key: string; value: string }[] = [];
-    if (body.chargesRate !== undefined) {
-      updates.push({ key: "charges_rate", value: String(body.chargesRate) });
+    const updates: Promise<void>[] = [];
+    if (chargesRate !== undefined) {
+      updates.push(upsertSetting("charges_rate", String(chargesRate)));
     }
-    if (body.workingDaysPerMonth !== undefined) {
-      updates.push({ key: "working_days_per_month", value: String(body.workingDaysPerMonth) });
+    if (workingDaysPerMonth !== undefined) {
+      updates.push(upsertSetting("working_days_per_month", String(workingDaysPerMonth)));
     }
-    if (body.companyName !== undefined) {
-      updates.push({ key: "company_name", value: body.companyName });
+    if (companyName !== undefined) {
+      updates.push(upsertSetting("company_name", companyName));
     }
 
-    for (const { key, value } of updates) {
-      await db
-        .update(companySettingsTable)
-        .set({ value, updatedAt: new Date() })
-        .where(eq(companySettingsTable.key, key));
-    }
-
+    await Promise.all(updates);
     res.json(await getSettingsObject());
   } catch (err) {
     req.log.error(err);
-    res.status(400).json({ error: "Invalid request" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-export { getSettingValue };
+export { getSettingsObject };
 export default router;

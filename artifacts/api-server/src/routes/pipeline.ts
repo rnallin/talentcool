@@ -1,6 +1,12 @@
 import { Router, type IRouter } from "express";
 import { db, pipelineStagesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import {
+  CreatePipelineStageBody,
+  UpdatePipelineStageParams,
+  UpdatePipelineStageBody,
+  DeletePipelineStageParams,
+} from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
@@ -30,20 +36,14 @@ router.get("/pipeline/stages", async (req, res) => {
 });
 
 router.post("/pipeline/stages", async (req, res) => {
+  const parsed = CreatePipelineStageBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+
   try {
-    const { name, label, color, position, isTerminal } = req.body as {
-      name: string;
-      label: string;
-      color?: string;
-      position?: number;
-      isTerminal?: boolean;
-    };
-
-    if (!name || !label) {
-      res.status(400).json({ error: "name and label are required" });
-      return;
-    }
-
+    const { name, label, color, position, isTerminal } = parsed.data;
     const [stage] = await db
       .insert(pipelineStagesTable)
       .values({
@@ -58,21 +58,27 @@ router.post("/pipeline/stages", async (req, res) => {
     res.status(201).json(stageToResponse(stage));
   } catch (err) {
     req.log.error(err);
-    res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Could not create stage" });
   }
 });
 
 router.patch("/pipeline/stages/:id", async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const { label, color, position, isTerminal } = req.body as {
-      label?: string;
-      color?: string;
-      position?: number;
-      isTerminal?: boolean;
-    };
+  const paramsParsed = UpdatePipelineStageParams.safeParse(req.params);
+  if (!paramsParsed.success) {
+    res.status(400).json({ error: "Invalid stage id" });
+    return;
+  }
 
+  const bodyParsed = UpdatePipelineStageBody.safeParse(req.body);
+  if (!bodyParsed.success) {
+    res.status(400).json({ error: bodyParsed.error.flatten() });
+    return;
+  }
+
+  try {
+    const { id } = paramsParsed.data;
     const updateData: Partial<typeof pipelineStagesTable.$inferInsert> = {};
+    const { label, color, position, isTerminal } = bodyParsed.data;
     if (label !== undefined) updateData.label = label;
     if (color !== undefined) updateData.color = color;
     if (position !== undefined) updateData.position = position;
@@ -97,9 +103,16 @@ router.patch("/pipeline/stages/:id", async (req, res) => {
 });
 
 router.delete("/pipeline/stages/:id", async (req, res) => {
+  const paramsParsed = DeletePipelineStageParams.safeParse(req.params);
+  if (!paramsParsed.success) {
+    res.status(400).json({ error: "Invalid stage id" });
+    return;
+  }
+
   try {
-    const id = parseInt(req.params.id);
-    await db.delete(pipelineStagesTable).where(eq(pipelineStagesTable.id, id));
+    await db
+      .delete(pipelineStagesTable)
+      .where(eq(pipelineStagesTable.id, paramsParsed.data.id));
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

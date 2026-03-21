@@ -1,6 +1,15 @@
 import { Router, type IRouter } from "express";
-import { db, jobsTable, candidatesTable, departmentsTable } from "@workspace/db";
+import { db, jobsTable, candidatesTable, departmentsTable, companySettingsTable } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
+
+async function getChargesRate(): Promise<number> {
+  const [row] = await db
+    .select()
+    .from(companySettingsTable)
+    .where(eq(companySettingsTable.key, "charges_rate"))
+    .limit(1);
+  return parseFloat(row?.value ?? "0.68");
+}
 
 const router: IRouter = Router();
 
@@ -45,15 +54,17 @@ router.get("/metrics/overview", async (req, res) => {
       (h) => h.updatedAt >= startOfLastMonth && h.updatedAt <= endOfLastMonth
     ).length;
 
-    const openJobs = await db
-      .select({ minSalary: jobsTable.minSalary, maxSalary: jobsTable.maxSalary, openedAt: jobsTable.openedAt })
-      .from(jobsTable)
-      .where(eq(jobsTable.status, "open"));
+    const [openJobs, chargesRate] = await Promise.all([
+      db
+        .select({ minSalary: jobsTable.minSalary, maxSalary: jobsTable.maxSalary, openedAt: jobsTable.openedAt })
+        .from(jobsTable)
+        .where(eq(jobsTable.status, "open")),
+      getChargesRate(),
+    ]);
 
-    const CHARGES_RATE = 0.68;
     const totalOpenJobsCost = openJobs.reduce((sum, j) => {
       const avgSalary = (parseFloat(j.minSalary as string) + parseFloat(j.maxSalary as string)) / 2;
-      return sum + avgSalary * (1 + CHARGES_RATE);
+      return sum + avgSalary * (1 + chargesRate);
     }, 0);
 
     const [promotersResult] = await db

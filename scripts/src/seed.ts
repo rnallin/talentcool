@@ -1,4 +1,12 @@
-import { db, departmentsTable, jobsTable, candidatesTable, benchmarksTable } from "@workspace/db";
+import {
+  db,
+  departmentsTable,
+  jobsTable,
+  candidatesTable,
+  benchmarksTable,
+  pipelineStagesTable,
+  companySettingsTable,
+} from "@workspace/db";
 
 async function seed() {
   console.log("Seeding database...");
@@ -234,6 +242,31 @@ async function seed() {
 
   await db.insert(benchmarksTable).values(benchmarkData);
   console.log(`✓ ${benchmarkData.length} benchmark entries created`);
+
+  // Pipeline stages
+  await db
+    .insert(pipelineStagesTable)
+    .values([
+      { name: "triagem", label: "Triagem", color: "border-slate-200 bg-slate-50", position: 1, isTerminal: false },
+      { name: "entrevista_rh", label: "Entrevista RH", color: "border-indigo-200 bg-indigo-50", position: 2, isTerminal: false },
+      { name: "entrevista_tecnica", label: "Entrevista Técnica", color: "border-blue-200 bg-blue-50", position: 3, isTerminal: false },
+      { name: "proposta", label: "Proposta", color: "border-amber-200 bg-amber-50", position: 4, isTerminal: false },
+      { name: "contratado", label: "Contratado", color: "border-emerald-200 bg-emerald-50", position: 5, isTerminal: true },
+      { name: "reprovado", label: "Reprovado", color: "border-rose-200 bg-rose-50", position: 6, isTerminal: true },
+    ])
+    .onConflictDoNothing();
+  console.log("✓ 6 pipeline stages created");
+
+  // Company settings
+  await db
+    .insert(companySettingsTable)
+    .values([
+      { key: "charges_rate", value: "0.68" },
+      { key: "working_days_per_month", value: "22" },
+      { key: "company_name", value: "Empresa Demo" },
+    ])
+    .onConflictDoNothing();
+  console.log("✓ Company settings seeded");
 
   console.log("✅ Seed complete!");
   process.exit(0);
