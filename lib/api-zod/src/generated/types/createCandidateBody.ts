@@ -6,13 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CreateCandidateBodySource } from "./createCandidateBodySource";
-import type { CreateCandidateBodyStage } from "./createCandidateBodyStage";
 
 export interface CreateCandidateBody {
   name: string;
   email: string;
   phone?: string | null;
-  stage: CreateCandidateBodyStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage: string;
   source: CreateCandidateBodySource;
   notes?: string | null;
 }

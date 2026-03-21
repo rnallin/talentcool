@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, jobsTable, candidatesTable, departmentsTable, companySettingsTable } from "@workspace/db";
+import { db, jobsTable, candidatesTable, departmentsTable, companySettingsTable, pipelineStagesTable } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
 
 async function getChargesRate(): Promise<number> {
@@ -142,27 +142,26 @@ router.get("/metrics/time-to-hire", async (req, res) => {
 
 router.get("/metrics/funnel", async (req, res) => {
   try {
-    const stages = [
-      { stage: "triagem", label: "Triagem" },
-      { stage: "entrevista_rh", label: "Entrevista RH" },
-      { stage: "entrevista_tecnica", label: "Entrevista Técnica" },
-      { stage: "proposta", label: "Proposta" },
-      { stage: "contratado", label: "Contratado" },
-      { stage: "reprovado", label: "Reprovado" },
-    ];
+    const [pipelineStages, totalResult] = await Promise.all([
+      db
+        .select({ name: pipelineStagesTable.name, label: pipelineStagesTable.label })
+        .from(pipelineStagesTable)
+        .orderBy(pipelineStagesTable.position),
+      db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(candidatesTable)
+        .then((rows) => rows[0]),
+    ]);
 
-    const [totalResult] = await db
-      .select({ count: sql<number>`cast(count(*) as int)` })
-      .from(candidatesTable);
     const total = totalResult.count;
 
     const counts = await Promise.all(
-      stages.map(async (s) => {
+      pipelineStages.map(async (s) => {
         const [r] = await db
           .select({ count: sql<number>`cast(count(*) as int)` })
           .from(candidatesTable)
-          .where(eq(candidatesTable.stage, s.stage));
-        return { ...s, count: r.count };
+          .where(eq(candidatesTable.stage, s.name));
+        return { stage: s.name, label: s.label, count: r.count };
       })
     );
 

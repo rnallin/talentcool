@@ -677,7 +677,7 @@ components:
           nullable: true
         stage:
           type: string
-          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+          description: "Stage key - must match a name in pipeline_stages table"
         source:
           type: string
           enum: [linkedin, indicacao, site, outro]
@@ -712,7 +712,7 @@ components:
           nullable: true
         stage:
           type: string
-          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+          description: "Stage key - must match a name in pipeline_stages table"
         source:
           type: string
           enum: [linkedin, indicacao, site, outro]
@@ -730,7 +730,7 @@ components:
       properties:
         stage:
           type: string
-          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+          description: "Stage key - must match a name in pipeline_stages table"
         notes:
           type: string
           nullable: true

@@ -70,18 +70,6 @@ export interface Job {
   daysOpen: number;
 }
 
-export type CandidateStage =
-  (typeof CandidateStage)[keyof typeof CandidateStage];
-
-export const CandidateStage = {
-  triagem: "triagem",
-  entrevista_rh: "entrevista_rh",
-  entrevista_tecnica: "entrevista_tecnica",
-  proposta: "proposta",
-  contratado: "contratado",
-  reprovado: "reprovado",
-} as const;
-
 export type CandidateSource =
   (typeof CandidateSource)[keyof typeof CandidateSource];
 
@@ -98,7 +86,8 @@ export interface Candidate {
   name: string;
   email: string;
   phone?: string | null;
-  stage: CandidateStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage: string;
   source: CandidateSource;
   appliedAt: string;
   updatedAt: string;
@@ -193,18 +182,6 @@ export interface UpdateJobBody {
   requirements?: string | null;
 }
 
-export type CreateCandidateBodyStage =
-  (typeof CreateCandidateBodyStage)[keyof typeof CreateCandidateBodyStage];
-
-export const CreateCandidateBodyStage = {
-  triagem: "triagem",
-  entrevista_rh: "entrevista_rh",
-  entrevista_tecnica: "entrevista_tecnica",
-  proposta: "proposta",
-  contratado: "contratado",
-  reprovado: "reprovado",
-} as const;
-
 export type CreateCandidateBodySource =
   (typeof CreateCandidateBodySource)[keyof typeof CreateCandidateBodySource];
 
@@ -219,25 +196,15 @@ export interface CreateCandidateBody {
   name: string;
   email: string;
   phone?: string | null;
-  stage: CreateCandidateBodyStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage: string;
   source: CreateCandidateBodySource;
   notes?: string | null;
 }
 
-export type UpdateCandidateBodyStage =
-  (typeof UpdateCandidateBodyStage)[keyof typeof UpdateCandidateBodyStage];
-
-export const UpdateCandidateBodyStage = {
-  triagem: "triagem",
-  entrevista_rh: "entrevista_rh",
-  entrevista_tecnica: "entrevista_tecnica",
-  proposta: "proposta",
-  contratado: "contratado",
-  reprovado: "reprovado",
-} as const;
-
 export interface UpdateCandidateBody {
-  stage?: UpdateCandidateBodyStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage?: string;
   notes?: string | null;
   phone?: string | null;
 }

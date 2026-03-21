@@ -1,9 +1,14 @@
 import { Router, type IRouter } from "express";
-import { db, candidatesTable } from "@workspace/db";
+import { db, candidatesTable, pipelineStagesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateCandidateBody, UpdateCandidateBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
+
+async function getValidStageNames(): Promise<Set<string>> {
+  const stages = await db.select({ name: pipelineStagesTable.name }).from(pipelineStagesTable);
+  return new Set(stages.map((s) => s.name));
+}
 
 function candidateToResponse(c: typeof candidatesTable.$inferSelect) {
   return {
@@ -37,9 +42,23 @@ router.get("/jobs/:id/candidates", async (req, res) => {
 });
 
 router.post("/jobs/:id/candidates", async (req, res) => {
+  const parsed = CreateCandidateBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+
   try {
     const jobId = parseInt(req.params.id);
-    const body = CreateCandidateBody.parse(req.body);
+    const body = parsed.data;
+
+    const validStages = await getValidStageNames();
+    if (!validStages.has(body.stage)) {
+      res.status(400).json({
+        error: `Invalid stage "${body.stage}". Valid stages: ${[...validStages].join(", ")}`,
+      });
+      return;
+    }
 
     const [candidate] = await db
       .insert(candidatesTable)
@@ -62,9 +81,25 @@ router.post("/jobs/:id/candidates", async (req, res) => {
 });
 
 router.patch("/candidates/:id", async (req, res) => {
+  const parsed = UpdateCandidateBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+
   try {
     const id = parseInt(req.params.id);
-    const body = UpdateCandidateBody.parse(req.body);
+    const body = parsed.data;
+
+    if (body.stage !== undefined) {
+      const validStages = await getValidStageNames();
+      if (!validStages.has(body.stage)) {
+        res.status(400).json({
+          error: `Invalid stage "${body.stage}". Valid stages: ${[...validStages].join(", ")}`,
+        });
+        return;
+      }
+    }
 
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (body.stage !== undefined) updateData.stage = body.stage;

@@ -8,11 +8,9 @@
 
 export * from "./candidate";
 export * from "./candidateSource";
-export * from "./candidateStage";
 export * from "./companySettings";
 export * from "./createCandidateBody";
 export * from "./createCandidateBodySource";
-export * from "./createCandidateBodyStage";
 export * from "./createDepartmentBody";
 export * from "./createJobBody";
 export * from "./createJobBodySeniority";
@@ -39,7 +37,6 @@ export * from "./pipelineStage";
 export * from "./salaryBenchmark";
 export * from "./timeToHireByDept";
 export * from "./updateCandidateBody";
-export * from "./updateCandidateBodyStage";
 export * from "./updateCompanySettingsBody";
 export * from "./updateJobBody";
 export * from "./updateJobBodySeniority";

@@ -130,14 +130,9 @@ export const GetJobResponse = zod
           name: zod.string(),
           email: zod.string(),
           phone: zod.string().nullish(),
-          stage: zod.enum([
-            "triagem",
-            "entrevista_rh",
-            "entrevista_tecnica",
-            "proposta",
-            "contratado",
-            "reprovado",
-          ]),
+          stage: zod
+            .string()
+            .describe("Stage key - must match a name in pipeline_stages table"),
           source: zod.enum(["linkedin", "indicacao", "site", "outro"]),
           appliedAt: zod.date(),
           updatedAt: zod.date(),
@@ -213,14 +208,9 @@ export const ListJobCandidatesResponseItem = zod.object({
   name: zod.string(),
   email: zod.string(),
   phone: zod.string().nullish(),
-  stage: zod.enum([
-    "triagem",
-    "entrevista_rh",
-    "entrevista_tecnica",
-    "proposta",
-    "contratado",
-    "reprovado",
-  ]),
+  stage: zod
+    .string()
+    .describe("Stage key - must match a name in pipeline_stages table"),
   source: zod.enum(["linkedin", "indicacao", "site", "outro"]),
   appliedAt: zod.date(),
   updatedAt: zod.date(),
@@ -241,14 +231,9 @@ export const CreateCandidateBody = zod.object({
   name: zod.string(),
   email: zod.string(),
   phone: zod.string().nullish(),
-  stage: zod.enum([
-    "triagem",
-    "entrevista_rh",
-    "entrevista_tecnica",
-    "proposta",
-    "contratado",
-    "reprovado",
-  ]),
+  stage: zod
+    .string()
+    .describe("Stage key - must match a name in pipeline_stages table"),
   source: zod.enum(["linkedin", "indicacao", "site", "outro"]),
   notes: zod.string().nullish(),
 });
@@ -262,15 +247,9 @@ export const UpdateCandidateParams = zod.object({
 
 export const UpdateCandidateBody = zod.object({
   stage: zod
-    .enum([
-      "triagem",
-      "entrevista_rh",
-      "entrevista_tecnica",
-      "proposta",
-      "contratado",
-      "reprovado",
-    ])
-    .optional(),
+    .string()
+    .optional()
+    .describe("Stage key - must match a name in pipeline_stages table"),
   notes: zod.string().nullish(),
   phone: zod.string().nullish(),
 });
@@ -281,14 +260,9 @@ export const UpdateCandidateResponse = zod.object({
   name: zod.string(),
   email: zod.string(),
   phone: zod.string().nullish(),
-  stage: zod.enum([
-    "triagem",
-    "entrevista_rh",
-    "entrevista_tecnica",
-    "proposta",
-    "contratado",
-    "reprovado",
-  ]),
+  stage: zod
+    .string()
+    .describe("Stage key - must match a name in pipeline_stages table"),
   source: zod.enum(["linkedin", "indicacao", "site", "outro"]),
   appliedAt: zod.date(),
   updatedAt: zod.date(),

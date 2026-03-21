@@ -10,7 +10,6 @@ import type {
   Candidate,
   CreateCandidateBody,
   JobDetail,
-  CandidateStage,
   PipelineStage,
 } from "@workspace/api-client-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -206,7 +205,7 @@ export default function JobPipeline() {
       return;
 
     const candidateId = parseInt(draggableId);
-    const newStage = destination.droppableId as CandidateStage;
+    const newStage = destination.droppableId;
 
     queryClient.setQueryData<JobDetail>([`/api/jobs/${jobId}`], (oldData) => {
       if (!oldData) return oldData;

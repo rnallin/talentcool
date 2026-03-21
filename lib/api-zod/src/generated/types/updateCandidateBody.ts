@@ -5,10 +5,10 @@
  * HR Platform API
  * OpenAPI spec version: 0.1.0
  */
-import type { UpdateCandidateBodyStage } from "./updateCandidateBodyStage";
 
 export interface UpdateCandidateBody {
-  stage?: UpdateCandidateBodyStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage?: string;
   notes?: string | null;
   phone?: string | null;
 }

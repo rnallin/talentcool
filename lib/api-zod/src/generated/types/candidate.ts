@@ -6,7 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CandidateSource } from "./candidateSource";
-import type { CandidateStage } from "./candidateStage";
 
 export interface Candidate {
   id: number;
@@ -14,7 +13,8 @@ export interface Candidate {
   name: string;
   email: string;
   phone?: string | null;
-  stage: CandidateStage;
+  /** Stage key - must match a name in pipeline_stages table */
+  stage: string;
   source: CandidateSource;
   appliedAt: Date;
   updatedAt: Date;
