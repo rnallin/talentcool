@@ -104,6 +104,19 @@ Color palette (Dribbble-inspired clean dashboard):
 - Input validation: email format check, max 10 recipients
 - Email HTML templates with Talent Cool green branding (#145338)
 
+### Mobile App (`artifacts/mobile`)
+
+React Native (Expo) mobile app mirroring key HR features:
+- **Dashboard tab**: 6 KPI cards (open jobs, candidates, avg time-to-hire, total cost, cost/hire, hires this month) + recent jobs list
+- **Vagas tab**: Searchable/filterable job list with status chips (Todas/Abertas/Pausadas/Fechadas)
+- **Custos tab**: CoV (Cost of Vacancy) report with total loss, per-job breakdown, and CoV simulator
+- **Metricas tab**: Overview grid, hiring funnel bars, time-to-hire by department
+- **Job detail screen**: `/job/[id]` with candidate pipeline grouped by stage
+- Uses NativeTabs (liquid glass iOS 26+) with ClassicTabs fallback
+- Brand colors: primary #145338, accent #2d8a5e, background #FAFBFA
+- Custom components: KPICard, JobCard, ErrorBoundary/ErrorFallback
+- API consumption via `@workspace/api-client-react` generated hooks
+
 ### Landing Page (`artifacts/landing`)
 
 Talent Cool marketing landing page with hero, features, metrics, testimonials, pricing, footer — all in pt-BR with green accent palette matching the platform.
