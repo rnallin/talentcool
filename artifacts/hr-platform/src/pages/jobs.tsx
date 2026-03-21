@@ -111,7 +111,7 @@ export default function Jobs() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] rounded-2xl p-0 overflow-hidden border-0 shadow-2xl">
-            <div className="bg-gradient-to-r from-primary to-[#70709F] p-6">
+            <div className="bg-gradient-to-r from-primary to-[#145338] p-6">
               <DialogTitle className="text-white text-xl font-display">Criar Nova Vaga</DialogTitle>
               <DialogDescription className="text-white/70 mt-1">
                 Preencha as informações para abrir uma nova oportunidade.

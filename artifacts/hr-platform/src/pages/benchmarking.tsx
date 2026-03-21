@@ -87,12 +87,12 @@ function SalaryBandRow({
       <div className="relative h-3 rounded-full bg-muted overflow-visible mx-1">
         {/* IQR bar P25-P75 */}
         <div
-          className="absolute top-0 h-full rounded-full bg-[#B5BCC9]"
+          className="absolute top-0 h-full rounded-full bg-[#97A09B]"
           style={{ left: `${p25pct}%`, width: `${p75pct - p25pct}%` }}
         />
         {/* Median tick */}
         <div
-          className="absolute top-[-3px] bottom-[-3px] w-0.5 bg-[#70709F] rounded-full"
+          className="absolute top-[-3px] bottom-[-3px] w-0.5 bg-[#145338] rounded-full"
           style={{ left: `${medianPct}%` }}
         />
         {/* Internal salary dot */}
@@ -106,7 +106,7 @@ function SalaryBandRow({
 
       <div className="flex justify-between mt-2 text-[11px] text-muted-foreground">
         <span>P10: {formatCurrency(p10)}</span>
-        <span className="text-[#70709F] font-medium">Mediana: {formatCurrency(median)}</span>
+        <span className="text-[#145338] font-medium">Mediana: {formatCurrency(median)}</span>
         <span>P90: {formatCurrency(p90)}</span>
       </div>
       {internalSalary !== null && (
@@ -189,7 +189,7 @@ export default function Benchmarking() {
       <div>
         <h1 className="text-3xl font-display font-bold tracking-tight text-foreground flex items-center gap-3">
           Benchmarking de Mercado
-          <Badge className="bg-[#70709F]/15 text-[#70709F] hover:bg-[#70709F]/15 border-none text-xs rounded-full">
+          <Badge className="bg-[#145338]/15 text-[#145338] hover:bg-[#145338]/15 border-none text-xs rounded-full">
             Módulo Estratégico
           </Badge>
         </h1>
@@ -306,7 +306,7 @@ export default function Benchmarking() {
 
         {/* Comparison tab */}
         <TabsContent value="comparison">
-          <div className="mb-4 p-4 bg-[#70709F]/10 border border-[#70709F]/20 rounded-xl text-sm text-foreground">
+          <div className="mb-4 p-4 bg-[#145338]/10 border border-[#145338]/20 rounded-xl text-sm text-foreground">
             <strong>Comparativo Interno vs. Mercado</strong> — Cada vaga aberta é cruzada com o
             benchmark de mercado mais próximo pelo nome do cargo. Use para ajustar faixas salariais
             antes de fechar uma contratação.
@@ -416,11 +416,11 @@ export default function Benchmarking() {
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-2 rounded-full bg-[#B5BCC9]" />
+                      <div className="w-4 h-2 rounded-full bg-[#97A09B]" />
                       <span>Intervalo Interquartil (P25–P75)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-0.5 h-4 bg-[#70709F] rounded-full" />
+                      <div className="w-0.5 h-4 bg-[#145338] rounded-full" />
                       <span>Mediana do mercado (P50)</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -483,21 +483,21 @@ export default function Benchmarking() {
                       return (
                         <div
                           key={r.region}
-                          className={`p-3 rounded-xl border ${isSP ? "bg-[#70709F] border-[#70709F] text-white" : "bg-card border-border"}`}
+                          className={`p-3 rounded-xl border ${isSP ? "bg-[#145338] border-[#145338] text-white" : "bg-card border-border"}`}
                         >
                           <div className="flex items-center justify-between mb-1.5">
-                            <div className={`flex items-center gap-1 text-xs ${isSP ? "text-[#B5BCC9]" : "text-muted-foreground"}`}>
+                            <div className={`flex items-center gap-1 text-xs ${isSP ? "text-[#97A09B]" : "text-muted-foreground"}`}>
                               <MapPin className="w-3 h-3" />
                               <span>{r.region}</span>
                             </div>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isSP ? "bg-[#70709F]/80 text-white" : "bg-muted text-foreground"}`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isSP ? "bg-[#145338]/80 text-white" : "bg-muted text-foreground"}`}>
                               {r.index}
                             </span>
                           </div>
                           <div className={`text-lg font-bold ${isSP ? "text-white" : "text-foreground"}`}>
                             {formatCurrency(r.medianSalary)}
                           </div>
-                          <div className={`text-[11px] mt-0.5 ${isSP ? "text-[#B5BCC9]" : "text-muted-foreground"}`}>
+                          <div className={`text-[11px] mt-0.5 ${isSP ? "text-[#97A09B]" : "text-muted-foreground"}`}>
                             índice relativo a SP
                           </div>
                         </div>
@@ -524,7 +524,7 @@ export default function Benchmarking() {
                         <TableHead className="font-semibold text-foreground py-3">Nível</TableHead>
                         <TableHead className="font-semibold text-foreground text-right">P10</TableHead>
                         <TableHead className="font-semibold text-foreground text-right">P25</TableHead>
-                        <TableHead className="font-semibold text-foreground text-right text-[#70709F] bg-[#70709F]/10">Mediana</TableHead>
+                        <TableHead className="font-semibold text-foreground text-right text-[#145338] bg-[#145338]/10">Mediana</TableHead>
                         <TableHead className="font-semibold text-foreground text-right">P75</TableHead>
                         <TableHead className="font-semibold text-foreground text-right">P90</TableHead>
                         <TableHead className="font-semibold text-amber-600 text-right">Salário Interno</TableHead>
@@ -562,7 +562,7 @@ export default function Benchmarking() {
                               <TableCell className="text-right text-sm text-muted-foreground">
                                 {formatCurrency(band.p25)}
                               </TableCell>
-                              <TableCell className="text-right font-bold text-[#70709F] bg-[#70709F]/10">
+                              <TableCell className="text-right font-bold text-[#145338] bg-[#145338]/10">
                                 {formatCurrency(band.median)}
                               </TableCell>
                               <TableCell className="text-right text-sm text-muted-foreground">

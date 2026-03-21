@@ -78,20 +78,20 @@ function CurrencyTooltip({ active, payload, label }: TooltipProps<ValueType, Nam
 }
 
 const FUNNEL_COLORS = [
-  "from-[#70709F] to-[#5e5e8a]",
-  "from-[#AC69A8] to-[#9a5d97]",
-  "from-[#B5BCC9] to-[#9aa1ae]",
-  "from-[#5A5F5B] to-[#4a4e4b]",
-  "from-[#443334] to-[#362929]",
+  "from-[#145338] to-[#1a6b48]",
+  "from-[#2d8a5e] to-[#238a50]",
+  "from-[#97A09B] to-[#848d88]",
+  "from-[#6A6E6C] to-[#585b59]",
+  "from-[#000402] to-[#1a1c1b]",
   "from-slate-400 to-slate-500",
 ];
 
 const FUNNEL_BG = [
-  "bg-gradient-to-r from-[#70709F] to-[#5e5e8a]",
-  "bg-gradient-to-r from-[#AC69A8] to-[#9a5d97]",
-  "bg-gradient-to-r from-[#B5BCC9] to-[#9aa1ae]",
-  "bg-gradient-to-r from-[#5A5F5B] to-[#4a4e4b]",
-  "bg-gradient-to-r from-[#443334] to-[#362929]",
+  "bg-gradient-to-r from-[#145338] to-[#1a6b48]",
+  "bg-gradient-to-r from-[#2d8a5e] to-[#238a50]",
+  "bg-gradient-to-r from-[#97A09B] to-[#848d88]",
+  "bg-gradient-to-r from-[#6A6E6C] to-[#585b59]",
+  "bg-gradient-to-r from-[#000402] to-[#1a1c1b]",
   "bg-gradient-to-r from-slate-400 to-slate-500",
 ];
 
@@ -133,7 +133,7 @@ function FunnelViz({ stages }: { stages: FunnelStage[] }) {
 
               <div className="flex-1 flex justify-center">
                 <div
-                  className={`relative h-10 rounded-lg transition-all duration-300 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-[#70709F]/20" : ""}`}
+                  className={`relative h-10 rounded-lg transition-all duration-300 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-[#145338]/20" : ""}`}
                   style={{ width: `${widthPct}%` }}
                 >
                   <div className="absolute inset-0 flex items-center justify-between px-3">
@@ -198,10 +198,10 @@ function FunnelViz({ stages }: { stages: FunnelStage[] }) {
 }
 
 const STATIC_SOURCE_OF_HIRE = [
-  { name: "LinkedIn", value: 38, color: "#70709F" },
+  { name: "LinkedIn", value: 38, color: "#145338" },
   { name: "Indicação", value: 24, color: "#0d9488" },
-  { name: "Site da Empresa", value: 18, color: "#AC69A8" },
-  { name: "Gupy / Catho", value: 12, color: "#f59e0b" },
+  { name: "Site da Empresa", value: 18, color: "#97A09B" },
+  { name: "Gupy / Catho", value: 12, color: "#2d8a5e" },
   { name: "Outros", value: 8, color: "#64748b" },
 ];
 
@@ -223,7 +223,7 @@ function ClosedBar({ value, max }: { value: number; max: number }) {
     <div className="flex items-center gap-2">
       <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
         <div
-          className="h-full bg-[#70709F] rounded-full"
+          className="h-full bg-[#145338] rounded-full"
           style={{ width: `${Math.round((value / max) * 100)}%` }}
         />
       </div>
@@ -373,7 +373,7 @@ export default function Metrics() {
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                   <RechartsTooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="openings" name="Novas Vagas" stroke="#70709F" strokeWidth={2.5} dot={{ r: 4, fill: "#70709F", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="openings" name="Novas Vagas" stroke="#145338" strokeWidth={2.5} dot={{ r: 4, fill: "#145338", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
                   <Line type="monotone" dataKey="hires" name="Contratações" stroke="#0d9488" strokeWidth={2.5} dot={{ r: 4, fill: "#0d9488", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -405,9 +405,9 @@ export default function Metrics() {
                     type="monotone"
                     dataKey="costPerHire"
                     name="Custo/Hire"
-                    stroke="#70709F"
+                    stroke="#145338"
                     strokeWidth={2.5}
-                    dot={{ r: 5, fill: "#70709F", strokeWidth: 2, stroke: "#fff" }}
+                    dot={{ r: 5, fill: "#145338", strokeWidth: 2, stroke: "#fff" }}
                     activeDot={{ r: 7 }}
                     connectNulls
                   />
@@ -447,8 +447,8 @@ export default function Metrics() {
                     iconSize={8}
                     wrapperStyle={{ fontSize: "12px", paddingBottom: "8px" }}
                   />
-                  <Bar dataKey="openJobs" name="Vagas Abertas" fill="#B5BCC9" radius={[4, 4, 0, 0]} barSize={18} />
-                  <Bar dataKey="hires" name="Contratados" fill="#70709F" radius={[4, 4, 0, 0]} barSize={18} />
+                  <Bar dataKey="openJobs" name="Vagas Abertas" fill="#6A6E6C" radius={[4, 4, 0, 0]} barSize={18} />
+                  <Bar dataKey="hires" name="Contratados" fill="#145338" radius={[4, 4, 0, 0]} barSize={18} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -516,8 +516,8 @@ export default function Metrics() {
                   <Radar
                     name="Score"
                     dataKey="score"
-                    stroke="#70709F"
-                    fill="#70709F"
+                    stroke="#145338"
+                    fill="#145338"
                     fillOpacity={0.3}
                     strokeWidth={2}
                   />
@@ -531,7 +531,7 @@ export default function Metrics() {
         <Card className="col-span-1 lg:col-span-2 shadow-sm border-border rounded-xl">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#70709F]" />
+              <Zap className="w-4 h-4 text-[#145338]" />
               <CardTitle className="text-base">Performance por Recrutador</CardTitle>
             </div>
             <p className="text-xs text-muted-foreground">Indicadores individuais — Últimos 6 meses</p>
@@ -554,7 +554,7 @@ export default function Metrics() {
                     <tr key={r.name} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                       <td className="py-3.5 px-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#70709F]/15 flex items-center justify-center text-xs font-bold text-[#70709F]">
+                          <div className="w-9 h-9 rounded-full bg-[#145338]/15 flex items-center justify-center text-xs font-bold text-[#145338]">
                             {r.initials}
                           </div>
                           <span className="font-medium text-foreground">{r.name}</span>

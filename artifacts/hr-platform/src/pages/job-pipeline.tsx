@@ -57,7 +57,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 const FALLBACK_STAGES: PipelineStage[] = [
   { id: 1, name: "triagem", label: "Triagem", color: "border-slate-200 bg-slate-50", position: 1, isTerminal: false, createdAt: new Date().toISOString() },
-  { id: 2, name: "entrevista_rh", label: "Entrevista RH", color: "border-[#70709F]/30 bg-[#70709F]/10", position: 2, isTerminal: false, createdAt: new Date().toISOString() },
+  { id: 2, name: "entrevista_rh", label: "Entrevista RH", color: "border-[#145338]/30 bg-[#145338]/10", position: 2, isTerminal: false, createdAt: new Date().toISOString() },
   { id: 3, name: "entrevista_tecnica", label: "Entr. Técnica", color: "border-blue-200 bg-blue-50", position: 3, isTerminal: false, createdAt: new Date().toISOString() },
   { id: 4, name: "proposta", label: "Proposta", color: "border-amber-200 bg-amber-50", position: 4, isTerminal: false, createdAt: new Date().toISOString() },
   { id: 5, name: "contratado", label: "Contratado", color: "border-emerald-200 bg-emerald-50", position: 5, isTerminal: true, createdAt: new Date().toISOString() },
@@ -280,7 +280,7 @@ export default function JobPipeline() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] rounded-2xl border-0 shadow-2xl p-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-primary to-[#70709F] p-6">
+              <div className="bg-gradient-to-r from-primary to-[#145338] p-6">
                 <DialogHeader>
                   <DialogTitle className="text-white text-xl font-display">
                     Adicionar Candidato

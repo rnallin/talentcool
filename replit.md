@@ -77,6 +77,21 @@ HR Platform frontend. React + Vite app with 5 modules:
 - Métricas: time-to-hire by dept, funnel conversion, hires over time
 - Benchmarking: salary benchmarks by role, seniority, and Brazilian region
 
+### Design System
+
+Color palette (Dribbble-inspired clean dashboard):
+- Primary: `#145338` (dark green, HSL 155 63% 21%)
+- Foreground: `#000402` (near-black)
+- Sage: `#97A09B` (muted green-gray)
+- Gray: `#6A6E6C` (neutral text)
+- Accent green: `#2d8a5e` (lighter green for charts/gradients)
+- Background: pure white (`#FFFFFF`)
+- Sidebar: white/light with section labels (GERAL, FERRAMENTAS, OUTROS)
+
+### Landing Page (`artifacts/landing`)
+
+TalentOS marketing landing page with hero, features, metrics, testimonials, pricing, footer — all in pt-BR with green accent palette matching the platform.
+
 ### `artifacts/api-server` (`@workspace/api-server`)
 
 Express 5 API server. Routes in `src/routes/`:

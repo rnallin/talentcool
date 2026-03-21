@@ -18,11 +18,11 @@ import {
 } from "recharts";
 
 const COST_DISTRIBUTION = [
-  { name: "Custo de Oportunidade", value: 65, color: "#70709F" },
-  { name: "Recrutador/RH", value: 18, color: "#a78bfa" },
-  { name: "Agências", value: 11, color: "#3b82f6" },
-  { name: "Ferramentas", value: 4, color: "#06b6d4" },
-  { name: "Anúncios", value: 2, color: "#f59e0b" },
+  { name: "Custo de Oportunidade", value: 65, color: "#145338" },
+  { name: "Recrutador/RH", value: 18, color: "#2d8a5e" },
+  { name: "Agências", value: 11, color: "#97A09B" },
+  { name: "Ferramentas", value: 4, color: "#6A6E6C" },
+  { name: "Anúncios", value: 2, color: "#000402" },
 ];
 
 function KpiCard({
@@ -110,16 +110,16 @@ export default function Costs() {
           value={formatCurrency(totalAccruedCost)}
           sub={`${costData.jobs.length} vagas ativas`}
           icon={DollarSign}
-          iconBg="bg-[#70709F]/10"
-          iconColor="text-[#70709F]"
+          iconBg="bg-[#145338]/10"
+          iconColor="text-[#145338]"
         />
         <KpiCard
           label="Custo Médio por Vaga"
           value={formatCurrency(avgCostPerJob)}
           sub="Média geral"
           icon={Calculator}
-          iconBg="bg-[#AC69A8]/10"
-          iconColor="text-[#AC69A8]"
+          iconBg="bg-[#97A09B]/10"
+          iconColor="text-[#97A09B]"
         />
         <KpiCard
           label="Custo de Oportunidade"
@@ -179,10 +179,10 @@ export default function Costs() {
                     }}
                   />
                   <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Oportunidade" stackId="a" fill="#70709F" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="Recrutador" stackId="a" fill="#a78bfa" />
-                  <Bar dataKey="Agência" stackId="a" fill="#3b82f6" />
-                  <Bar dataKey="Anúncio" stackId="a" fill="#f59e0b" />
+                  <Bar dataKey="Oportunidade" stackId="a" fill="#145338" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Recrutador" stackId="a" fill="#2d8a5e" />
+                  <Bar dataKey="Agência" stackId="a" fill="#97A09B" />
+                  <Bar dataKey="Anúncio" stackId="a" fill="#6A6E6C" />
                   <Bar dataKey="Ferramentas" stackId="a" fill="#94a3b8" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -232,8 +232,8 @@ export default function Costs() {
         </Card>
       </div>
 
-      <div className="flex items-start gap-2 p-4 bg-[#70709F]/10 border border-[#70709F]/20 rounded-xl text-sm">
-        <AlertCircle className="h-4 w-4 text-[#70709F] mt-0.5 shrink-0" />
+      <div className="flex items-start gap-2 p-4 bg-[#145338]/10 border border-[#145338]/20 rounded-xl text-sm">
+        <AlertCircle className="h-4 w-4 text-[#145338] mt-0.5 shrink-0" />
         <div>
           <p className="font-semibold text-foreground">Como calculamos?</p>
           <p className="text-muted-foreground mt-0.5">

@@ -56,57 +56,57 @@
 }
 
 :root {
-  /* Design System — Neutral / Lavender */
-  --background: 120 5% 96%;
-  --foreground: 150 33% 2%;
+  /* Design System — Clean White / Green */
+  --background: 0 0% 100%;
+  --foreground: 150 100% 1%;
 
   --card: 0 0% 100%;
-  --card-foreground: 150 33% 2%;
-  --card-border: 219 16% 88%;
+  --card-foreground: 150 100% 1%;
+  --card-border: 150 4% 90%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 150 33% 2%;
-  --popover-border: 219 16% 88%;
+  --popover-foreground: 150 100% 1%;
+  --popover-border: 150 4% 90%;
 
-  /* Primary: Muted Lavender */
-  --primary: 240 19% 53%;
+  /* Primary: Dark Green #145338 */
+  --primary: 155 63% 21%;
   --primary-foreground: 0 0% 100%;
 
   /* Secondary */
-  --secondary: 219 16% 92%;
-  --secondary-foreground: 150 3% 30%;
+  --secondary: 140 4% 94%;
+  --secondary-foreground: 150 2% 42%;
 
-  --muted: 120 4% 93%;
-  --muted-foreground: 150 3% 36%;
+  --muted: 140 4% 96%;
+  --muted-foreground: 150 2% 42%;
 
-  --accent: 304 27% 94%;
-  --accent-foreground: 304 27% 40%;
+  --accent: 155 20% 94%;
+  --accent-foreground: 155 63% 21%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 219 16% 88%;
-  --input: 219 16% 88%;
-  --ring: 240 19% 53%;
+  --border: 150 4% 90%;
+  --input: 150 4% 90%;
+  --ring: 155 63% 21%;
 
-  /* Sidebar: Near-black */
-  --sidebar-background: 150 33% 2%;
-  --sidebar-foreground: 120 5% 92%;
-  --sidebar-primary: 240 19% 53%;
+  /* Sidebar: Light / White */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 150 2% 42%;
+  --sidebar-primary: 155 63% 21%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 12% 12%;
-  --sidebar-accent-foreground: 120 5% 92%;
-  --sidebar-border: 240 8% 16%;
-  --sidebar-ring: 240 19% 53%;
+  --sidebar-accent: 155 20% 95%;
+  --sidebar-accent-foreground: 150 100% 1%;
+  --sidebar-border: 150 4% 92%;
+  --sidebar-ring: 155 63% 21%;
 
   --radius: 0.75rem;
 
   /* Chart colors */
-  --chart-1: 240 19% 53%;
-  --chart-2: 304 27% 54%;
-  --chart-3: 156 72% 45%;
+  --chart-1: 155 63% 21%;
+  --chart-2: 155 30% 45%;
+  --chart-3: 140 4% 61%;
   --chart-4: 43 96% 56%;
-  --chart-5: 340 60% 55%;
+  --chart-5: 0 70% 55%;
 
   /* Shadows */
   --shadow-card: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
