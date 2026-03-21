@@ -281,4 +281,103 @@ router.get("/metrics/hires-over-time", async (req, res) => {
   }
 });
 
+router.get("/metrics/cost-per-hire-trend", async (req, res) => {
+  try {
+    const chargesRate = await getChargesRate();
+    const workingDaysRow = await db
+      .select({ value: companySettingsTable.value })
+      .from(companySettingsTable)
+      .where(eq(companySettingsTable.key, "working_days_per_month"))
+      .limit(1);
+    const workingDays = parseInt(workingDaysRow[0]?.value ?? "22");
+
+    const now = new Date();
+    const result = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+
+      const hired = await db
+        .select({
+          minSalary: jobsTable.minSalary,
+          maxSalary: jobsTable.maxSalary,
+          appliedAt: candidatesTable.appliedAt,
+          updatedAt: candidatesTable.updatedAt,
+        })
+        .from(candidatesTable)
+        .leftJoin(jobsTable, eq(candidatesTable.jobId, jobsTable.id))
+        .where(
+          and(
+            eq(candidatesTable.stage, "contratado"),
+            sql`${candidatesTable.updatedAt} >= ${monthStart}`,
+            sql`${candidatesTable.updatedAt} <= ${monthEnd}`
+          )
+        );
+
+      const avgCost =
+        hired.length > 0
+          ? hired.reduce((sum, h) => {
+              const avgSalary =
+                (parseFloat(h.minSalary as string) + parseFloat(h.maxSalary as string)) / 2;
+              const days = Math.max(
+                1,
+                Math.floor(
+                  (h.updatedAt.getTime() - h.appliedAt.getTime()) / (1000 * 60 * 60 * 24)
+                )
+              );
+              return sum + (avgSalary * (1 + chargesRate) / workingDays) * days;
+            }, 0) / hired.length
+          : null;
+
+      const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
+      result.push({
+        month: monthLabel,
+        costPerHire: avgCost !== null ? parseFloat(avgCost.toFixed(2)) : null,
+        hireCount: hired.length,
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/metrics/hires-by-department", async (req, res) => {
+  try {
+    const departments = await db.select().from(departmentsTable);
+
+    const result = await Promise.all(
+      departments.map(async (dept) => {
+        const [openJobsResult] = await db
+          .select({ count: sql<number>`cast(count(*) as int)` })
+          .from(jobsTable)
+          .where(and(eq(jobsTable.departmentId, dept.id), eq(jobsTable.status, "open")));
+
+        const [hiresResult] = await db
+          .select({ count: sql<number>`cast(count(*) as int)` })
+          .from(candidatesTable)
+          .leftJoin(jobsTable, eq(candidatesTable.jobId, jobsTable.id))
+          .where(
+            and(eq(jobsTable.departmentId, dept.id), eq(candidatesTable.stage, "contratado"))
+          );
+
+        return {
+          department: dept.name,
+          openJobs: openJobsResult.count,
+          hires: hiresResult.count,
+        };
+      })
+    );
+
+    res.json(result.filter((r) => r.openJobs > 0 || r.hires > 0));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

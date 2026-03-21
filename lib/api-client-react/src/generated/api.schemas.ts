@@ -319,6 +319,48 @@ export interface UpdateCompanySettingsBody {
   companyName?: string;
 }
 
+export interface CostPerHireTrendPoint {
+  month: string;
+  costPerHire?: number | null;
+  hireCount: number;
+}
+
+export interface HiresByDepartment {
+  department: string;
+  openJobs: number;
+  hires: number;
+}
+
+export interface SalaryBand {
+  seniority: string;
+  p10: number;
+  p25: number;
+  median: number;
+  p75: number;
+  p90: number;
+  sampleSize: number;
+  internalSalary?: number | null;
+}
+
+export interface SalaryBandsResponse {
+  jobTitle: string;
+  region: string;
+  bands: SalaryBand[];
+}
+
+export interface RegionalVariationPoint {
+  region: string;
+  medianSalary: number;
+  index: number;
+  sampleSize: number;
+}
+
+export interface RegionalVariationResponse {
+  jobTitle: string;
+  seniority: string;
+  regions: RegionalVariationPoint[];
+}
+
 export type ListJobsParams = {
   status?: ListJobsStatus;
   departmentId?: number;
@@ -336,4 +378,14 @@ export const ListJobsStatus = {
 export type ListBenchmarksParams = {
   region?: string;
   jobTitle?: string;
+};
+
+export type GetBenchmarkSalaryBandsParams = {
+  jobTitle: string;
+  region?: string;
+};
+
+export type GetBenchmarkRegionalVariationParams = {
+  jobTitle: string;
+  seniority?: string;
 };

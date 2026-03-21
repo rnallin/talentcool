@@ -19,6 +19,7 @@ import type {
 import type {
   Candidate,
   CompanySettings,
+  CostPerHireTrendPoint,
   CreateCandidateBody,
   CreateDepartmentBody,
   CreateJobBody,
@@ -26,7 +27,10 @@ import type {
   Department,
   ErrorResponse,
   FunnelStage,
+  GetBenchmarkRegionalVariationParams,
+  GetBenchmarkSalaryBandsParams,
   HealthStatus,
+  HiresByDepartment,
   Job,
   JobDetail,
   ListBenchmarksParams,
@@ -35,6 +39,8 @@ import type {
   MonthlyHires,
   OpenJobsCostReport,
   PipelineStage,
+  RegionalVariationResponse,
+  SalaryBandsResponse,
   SalaryBenchmark,
   TimeToHireByDept,
   UpdateCandidateBody,
@@ -1360,6 +1366,156 @@ export function useGetHiresOverTime<
 }
 
 /**
+ * @summary Monthly cost-per-hire trend for the last 7 months
+ */
+export const getGetCostPerHireTrendUrl = () => {
+  return `/api/metrics/cost-per-hire-trend`;
+};
+
+export const getCostPerHireTrend = async (
+  options?: RequestInit,
+): Promise<CostPerHireTrendPoint[]> => {
+  return customFetch<CostPerHireTrendPoint[]>(getGetCostPerHireTrendUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCostPerHireTrendQueryKey = () => {
+  return [`/api/metrics/cost-per-hire-trend`] as const;
+};
+
+export const getGetCostPerHireTrendQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCostPerHireTrend>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCostPerHireTrend>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCostPerHireTrendQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCostPerHireTrend>>
+  > = ({ signal }) => getCostPerHireTrend({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCostPerHireTrend>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCostPerHireTrendQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCostPerHireTrend>>
+>;
+export type GetCostPerHireTrendQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Monthly cost-per-hire trend for the last 7 months
+ */
+
+export function useGetCostPerHireTrend<
+  TData = Awaited<ReturnType<typeof getCostPerHireTrend>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCostPerHireTrend>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCostPerHireTrendQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Open jobs vs hires per department
+ */
+export const getGetHiresByDepartmentUrl = () => {
+  return `/api/metrics/hires-by-department`;
+};
+
+export const getHiresByDepartment = async (
+  options?: RequestInit,
+): Promise<HiresByDepartment[]> => {
+  return customFetch<HiresByDepartment[]>(getGetHiresByDepartmentUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetHiresByDepartmentQueryKey = () => {
+  return [`/api/metrics/hires-by-department`] as const;
+};
+
+export const getGetHiresByDepartmentQueryOptions = <
+  TData = Awaited<ReturnType<typeof getHiresByDepartment>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getHiresByDepartment>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetHiresByDepartmentQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getHiresByDepartment>>
+  > = ({ signal }) => getHiresByDepartment({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getHiresByDepartment>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetHiresByDepartmentQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getHiresByDepartment>>
+>;
+export type GetHiresByDepartmentQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Open jobs vs hires per department
+ */
+
+export function useGetHiresByDepartment<
+  TData = Awaited<ReturnType<typeof getHiresByDepartment>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getHiresByDepartment>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetHiresByDepartmentQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Calculate total cost of open job positions
  */
 export const getGetOpenJobsCostUrl = () => {
@@ -1671,6 +1827,218 @@ export function useListBenchmarkJobTitles<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListBenchmarkJobTitlesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Salary percentile bands (P10/P25/P50/P75/P90) for a job title per seniority
+ */
+export const getGetBenchmarkSalaryBandsUrl = (
+  params: GetBenchmarkSalaryBandsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/benchmark/salary-bands?${stringifiedParams}`
+    : `/api/benchmark/salary-bands`;
+};
+
+export const getBenchmarkSalaryBands = async (
+  params: GetBenchmarkSalaryBandsParams,
+  options?: RequestInit,
+): Promise<SalaryBandsResponse> => {
+  return customFetch<SalaryBandsResponse>(
+    getGetBenchmarkSalaryBandsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetBenchmarkSalaryBandsQueryKey = (
+  params?: GetBenchmarkSalaryBandsParams,
+) => {
+  return [`/api/benchmark/salary-bands`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetBenchmarkSalaryBandsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBenchmarkSalaryBands>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetBenchmarkSalaryBandsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBenchmarkSalaryBands>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBenchmarkSalaryBandsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBenchmarkSalaryBands>>
+  > = ({ signal }) =>
+    getBenchmarkSalaryBands(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBenchmarkSalaryBands>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBenchmarkSalaryBandsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBenchmarkSalaryBands>>
+>;
+export type GetBenchmarkSalaryBandsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Salary percentile bands (P10/P25/P50/P75/P90) for a job title per seniority
+ */
+
+export function useGetBenchmarkSalaryBands<
+  TData = Awaited<ReturnType<typeof getBenchmarkSalaryBands>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetBenchmarkSalaryBandsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBenchmarkSalaryBands>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBenchmarkSalaryBandsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Regional salary variation indexed to São Paulo
+ */
+export const getGetBenchmarkRegionalVariationUrl = (
+  params: GetBenchmarkRegionalVariationParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/benchmark/regional-variation?${stringifiedParams}`
+    : `/api/benchmark/regional-variation`;
+};
+
+export const getBenchmarkRegionalVariation = async (
+  params: GetBenchmarkRegionalVariationParams,
+  options?: RequestInit,
+): Promise<RegionalVariationResponse> => {
+  return customFetch<RegionalVariationResponse>(
+    getGetBenchmarkRegionalVariationUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetBenchmarkRegionalVariationQueryKey = (
+  params?: GetBenchmarkRegionalVariationParams,
+) => {
+  return [
+    `/api/benchmark/regional-variation`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetBenchmarkRegionalVariationQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetBenchmarkRegionalVariationParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetBenchmarkRegionalVariationQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>
+  > = ({ signal }) =>
+    getBenchmarkRegionalVariation(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBenchmarkRegionalVariationQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>
+>;
+export type GetBenchmarkRegionalVariationQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Regional salary variation indexed to São Paulo
+ */
+
+export function useGetBenchmarkRegionalVariation<
+  TData = Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetBenchmarkRegionalVariationParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBenchmarkRegionalVariation>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBenchmarkRegionalVariationQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

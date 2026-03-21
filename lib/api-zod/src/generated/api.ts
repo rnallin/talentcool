@@ -334,6 +334,30 @@ export const GetHiresOverTimeResponseItem = zod.object({
 export const GetHiresOverTimeResponse = zod.array(GetHiresOverTimeResponseItem);
 
 /**
+ * @summary Monthly cost-per-hire trend for the last 7 months
+ */
+export const GetCostPerHireTrendResponseItem = zod.object({
+  month: zod.string(),
+  costPerHire: zod.number().nullish(),
+  hireCount: zod.number(),
+});
+export const GetCostPerHireTrendResponse = zod.array(
+  GetCostPerHireTrendResponseItem,
+);
+
+/**
+ * @summary Open jobs vs hires per department
+ */
+export const GetHiresByDepartmentResponseItem = zod.object({
+  department: zod.string(),
+  openJobs: zod.number(),
+  hires: zod.number(),
+});
+export const GetHiresByDepartmentResponse = zod.array(
+  GetHiresByDepartmentResponseItem,
+);
+
+/**
  * @summary Calculate total cost of open job positions
  */
 export const GetOpenJobsCostResponse = zod.object({
@@ -392,6 +416,52 @@ export const ListBenchmarkJobTitlesResponseItem = zod.string();
 export const ListBenchmarkJobTitlesResponse = zod.array(
   ListBenchmarkJobTitlesResponseItem,
 );
+
+/**
+ * @summary Salary percentile bands (P10/P25/P50/P75/P90) for a job title per seniority
+ */
+export const GetBenchmarkSalaryBandsQueryParams = zod.object({
+  jobTitle: zod.coerce.string(),
+  region: zod.coerce.string().optional(),
+});
+
+export const GetBenchmarkSalaryBandsResponse = zod.object({
+  jobTitle: zod.string(),
+  region: zod.string(),
+  bands: zod.array(
+    zod.object({
+      seniority: zod.string(),
+      p10: zod.number(),
+      p25: zod.number(),
+      median: zod.number(),
+      p75: zod.number(),
+      p90: zod.number(),
+      sampleSize: zod.number(),
+      internalSalary: zod.number().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary Regional salary variation indexed to São Paulo
+ */
+export const GetBenchmarkRegionalVariationQueryParams = zod.object({
+  jobTitle: zod.coerce.string(),
+  seniority: zod.coerce.string().optional(),
+});
+
+export const GetBenchmarkRegionalVariationResponse = zod.object({
+  jobTitle: zod.string(),
+  seniority: zod.string(),
+  regions: zod.array(
+    zod.object({
+      region: zod.string(),
+      medianSalary: zod.number(),
+      index: zod.number(),
+      sampleSize: zod.number(),
+    }),
+  ),
+});
 
 /**
  * @summary List all pipeline stages ordered by position

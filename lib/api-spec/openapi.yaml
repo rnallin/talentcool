@@ -317,6 +317,36 @@ paths:
                 items:
                   $ref: "#/components/schemas/MonthlyHires"
 
+  /metrics/cost-per-hire-trend:
+    get:
+      operationId: getCostPerHireTrend
+      tags: [metrics]
+      summary: Monthly cost-per-hire trend for the last 7 months
+      responses:
+        "200":
+          description: Cost per hire trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CostPerHireTrendPoint"
+
+  /metrics/hires-by-department:
+    get:
+      operationId: getHiresByDepartment
+      tags: [metrics]
+      summary: Open jobs vs hires per department
+      responses:
+        "200":
+          description: Department hiring data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HiresByDepartment"
+
   /cost/open-jobs:
     get:
       operationId: getOpenJobsCost
@@ -385,6 +415,54 @@ paths:
                 type: array
                 items:
                   type: string
+
+  /benchmark/salary-bands:
+    get:
+      operationId: getBenchmarkSalaryBands
+      tags: [benchmark]
+      summary: Salary percentile bands (P10/P25/P50/P75/P90) for a job title per seniority
+      parameters:
+        - name: jobTitle
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Salary bands per seniority
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SalaryBandsResponse"
+
+  /benchmark/regional-variation:
+    get:
+      operationId: getBenchmarkRegionalVariation
+      tags: [benchmark]
+      summary: Regional salary variation indexed to São Paulo
+      parameters:
+        - name: jobTitle
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: seniority
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Regional salary variation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionalVariationResponse"
 
   /pipeline/stages:
     get:
@@ -993,3 +1071,109 @@ components:
           type: integer
         companyName:
           type: string
+
+    CostPerHireTrendPoint:
+      type: object
+      properties:
+        month:
+          type: string
+        costPerHire:
+          type: number
+          nullable: true
+        hireCount:
+          type: integer
+      required:
+        - month
+        - hireCount
+
+    HiresByDepartment:
+      type: object
+      properties:
+        department:
+          type: string
+        openJobs:
+          type: integer
+        hires:
+          type: integer
+      required:
+        - department
+        - openJobs
+        - hires
+
+    SalaryBand:
+      type: object
+      properties:
+        seniority:
+          type: string
+        p10:
+          type: number
+        p25:
+          type: number
+        median:
+          type: number
+        p75:
+          type: number
+        p90:
+          type: number
+        sampleSize:
+          type: integer
+        internalSalary:
+          type: number
+          nullable: true
+      required:
+        - seniority
+        - p10
+        - p25
+        - median
+        - p75
+        - p90
+        - sampleSize
+
+    SalaryBandsResponse:
+      type: object
+      properties:
+        jobTitle:
+          type: string
+        region:
+          type: string
+        bands:
+          type: array
+          items:
+            $ref: "#/components/schemas/SalaryBand"
+      required:
+        - jobTitle
+        - region
+        - bands
+
+    RegionalVariationPoint:
+      type: object
+      properties:
+        region:
+          type: string
+        medianSalary:
+          type: number
+        index:
+          type: integer
+        sampleSize:
+          type: integer
+      required:
+        - region
+        - medianSalary
+        - index
+        - sampleSize
+
+    RegionalVariationResponse:
+      type: object
+      properties:
+        jobTitle:
+          type: string
+        seniority:
+          type: string
+        regions:
+          type: array
+          items:
+            $ref: "#/components/schemas/RegionalVariationPoint"
+      required:
+        - jobTitle
+        - seniority
+        - regions
