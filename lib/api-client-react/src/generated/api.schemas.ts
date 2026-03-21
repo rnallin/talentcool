@@ -251,6 +251,8 @@ export interface MetricsOverview {
   openJobsGrowth: number;
   candidatesGrowth: number;
   totalOpenJobsCost: number;
+  /** Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio */
+  candidateNps: number;
 }
 
 export interface TimeToHireByDept {

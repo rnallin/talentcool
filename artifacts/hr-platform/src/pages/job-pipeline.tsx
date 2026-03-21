@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useRoute } from "wouter";
 import { useGetJob, useUpdateCandidate, useCreateCandidate } from "@workspace/api-client-react";
-import type { Candidate, CreateCandidateBody } from "@workspace/api-client-react";
+import type { Candidate, CreateCandidateBody, JobDetail, CandidateStage } from "@workspace/api-client-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -144,12 +144,11 @@ export default function JobPipeline() {
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
     const candidateId = parseInt(draggableId);
-    const newStage = destination.droppableId as any;
+    const newStage = destination.droppableId as CandidateStage;
 
-    // Optimistic UI Update
-    queryClient.setQueryData([`/api/jobs/${jobId}`], (oldData: any) => {
+    queryClient.setQueryData<JobDetail>([`/api/jobs/${jobId}`], (oldData) => {
       if (!oldData) return oldData;
-      const updatedCandidates = oldData.candidates.map((c: Candidate) => 
+      const updatedCandidates = oldData.candidates.map((c: Candidate) =>
         c.id === candidateId ? { ...c, stage: newStage, updatedAt: new Date().toISOString() } : c
       );
       return { ...oldData, candidates: updatedCandidates };

@@ -314,6 +314,11 @@ export const GetMetricsOverviewResponse = zod.object({
   openJobsGrowth: zod.number(),
   candidatesGrowth: zod.number(),
   totalOpenJobsCost: zod.number(),
+  candidateNps: zod
+    .number()
+    .describe(
+      "Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio",
+    ),
 });
 
 /**

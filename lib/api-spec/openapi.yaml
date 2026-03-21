@@ -655,6 +655,9 @@ components:
           type: number
         totalOpenJobsCost:
           type: number
+        candidateNps:
+          type: number
+          description: Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio
       required:
         - totalOpenJobs
         - totalCandidates
@@ -664,6 +667,7 @@ components:
         - openJobsGrowth
         - candidatesGrowth
         - totalOpenJobsCost
+        - candidateNps
 
     TimeToHireByDept:
       type: object

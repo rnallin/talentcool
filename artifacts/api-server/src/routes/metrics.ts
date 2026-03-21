@@ -56,6 +56,24 @@ router.get("/metrics/overview", async (req, res) => {
       return sum + avgSalary * (1 + CHARGES_RATE);
     }, 0);
 
+    const [promotersResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.stage, "contratado"));
+
+    const [detractorsResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(candidatesTable)
+      .where(eq(candidatesTable.stage, "reprovado"));
+
+    const total = totalCandidatesResult.count;
+    const candidateNps =
+      total > 0
+        ? parseFloat(
+            (((promotersResult.count - detractorsResult.count) / total) * 100).toFixed(1)
+          )
+        : 0;
+
     res.json({
       totalOpenJobs: openJobsResult.count,
       totalCandidates: totalCandidatesResult.count,
@@ -65,6 +83,7 @@ router.get("/metrics/overview", async (req, res) => {
       openJobsGrowth: 0,
       candidatesGrowth: 0,
       totalOpenJobsCost: parseFloat(totalOpenJobsCost.toFixed(2)),
+      candidateNps,
     });
   } catch (err) {
     req.log.error(err);
