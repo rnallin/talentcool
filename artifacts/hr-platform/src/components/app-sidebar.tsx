@@ -9,6 +9,7 @@ import {
   Settings,
   HelpCircle,
   Sparkles,
+  Mail,
 } from "lucide-react";
 
 const generalItems = [
@@ -21,6 +22,7 @@ const toolItems = [
   { title: "Custo de Vagas", url: "/custo", icon: Calculator },
   { title: "Benchmarking", url: "/benchmarking", icon: LineChart },
   { title: "Assistente IA", url: "/assistente", icon: Sparkles },
+  { title: "E-mails", url: "/emails", icon: Mail },
 ];
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {

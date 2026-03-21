@@ -9,6 +9,7 @@ import benchmarkRouter from "./benchmark";
 import pipelineRouter from "./pipeline";
 import settingsRouter from "./settings";
 import aiRouter from "./ai";
+import emailRouter from "./email";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(benchmarkRouter);
 router.use(pipelineRouter);
 router.use(settingsRouter);
 router.use(aiRouter);
+router.use(emailRouter);
 
 export default router;

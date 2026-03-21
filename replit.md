@@ -95,6 +95,15 @@ Color palette (Dribbble-inspired clean dashboard):
 - Uses Replit AI Integrations (OpenAI proxy) — no API key needed, billed to credits
 - Lazy OpenAI client initialization to avoid startup failures
 
+### Internal Email Module
+- /emails page: send templated emails via Resend integration
+- 3 templates: Relatório de RH (full report), Insights & Alertas (smart analysis), E-mail Personalizado (custom)
+- Preview panel with iframe rendering before sending
+- Backend: POST /api/email/send and /api/email/preview
+- Uses Replit connector credentials for Resend (auto-managed API key)
+- Input validation: email format check, max 10 recipients
+- Email HTML templates with TalentOS green branding (#145338)
+
 ### Landing Page (`artifacts/landing`)
 
 TalentOS marketing landing page with hero, features, metrics, testimonials, pricing, footer — all in pt-BR with green accent palette matching the platform.
