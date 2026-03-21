@@ -1,22 +1,35 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: HR Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: departments
+    description: Department management
+  - name: jobs
+    description: Job openings management
+  - name: candidates
+    description: Candidate management
+  - name: pipeline
+    description: Hiring pipeline stages
+  - name: metrics
+    description: HR performance metrics
+  - name: cost
+    description: Job cost calculations
+  - name: benchmark
+    description: Salary benchmarking by region
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,353 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /departments:
+    get:
+      operationId: listDepartments
+      tags: [departments]
+      summary: List all departments
+      responses:
+        "200":
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+    post:
+      operationId: createDepartment
+      tags: [departments]
+      summary: Create a department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDepartmentBody"
+      responses:
+        "201":
+          description: Created department
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List all job openings
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed, paused]
+        - name: departmentId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a job opening
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobBody"
+      responses:
+        "201":
+          description: Created job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job opening
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateJobBody"
+      responses:
+        "200":
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete a job opening
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /jobs/{id}/candidates:
+    get:
+      operationId: listJobCandidates
+      tags: [candidates]
+      summary: List candidates for a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candidate"
+    post:
+      operationId: createCandidate
+      tags: [candidates]
+      summary: Add a candidate to a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateBody"
+      responses:
+        "201":
+          description: Created candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+
+  /candidates/{id}:
+    patch:
+      operationId: updateCandidate
+      tags: [candidates]
+      summary: Update candidate stage or status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCandidateBody"
+      responses:
+        "200":
+          description: Updated candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+    delete:
+      operationId: deleteCandidate
+      tags: [candidates]
+      summary: Delete a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /metrics/overview:
+    get:
+      operationId: getMetricsOverview
+      tags: [metrics]
+      summary: Get HR overview KPIs
+      responses:
+        "200":
+          description: HR metrics overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsOverview"
+
+  /metrics/time-to-hire:
+    get:
+      operationId: getTimeToHireMetrics
+      tags: [metrics]
+      summary: Time-to-hire metrics by department
+      responses:
+        "200":
+          description: Time-to-hire data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeToHireByDept"
+
+  /metrics/funnel:
+    get:
+      operationId: getFunnelMetrics
+      tags: [metrics]
+      summary: Hiring funnel conversion rates
+      responses:
+        "200":
+          description: Funnel data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FunnelStage"
+
+  /metrics/hires-over-time:
+    get:
+      operationId: getHiresOverTime
+      tags: [metrics]
+      summary: Hires per month over time
+      responses:
+        "200":
+          description: Monthly hires data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyHires"
+
+  /cost/open-jobs:
+    get:
+      operationId: getOpenJobsCost
+      tags: [cost]
+      summary: Calculate total cost of open job positions
+      responses:
+        "200":
+          description: Cost breakdown for all open jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenJobsCostReport"
+
+  /benchmark:
+    get:
+      operationId: listBenchmarks
+      tags: [benchmark]
+      summary: List salary benchmark data
+      parameters:
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: jobTitle
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Benchmark data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SalaryBenchmark"
+
+  /benchmark/regions:
+    get:
+      operationId: listBenchmarkRegions
+      tags: [benchmark]
+      summary: List available benchmark regions
+      responses:
+        "200":
+          description: Regions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /benchmark/job-titles:
+    get:
+      operationId: listBenchmarkJobTitles
+      tags: [benchmark]
+      summary: List available job titles in benchmark data
+      responses:
+        "200":
+          description: Job titles list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +394,405 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        headcount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - headcount
+        - createdAt
+
+    CreateDepartmentBody:
+      type: object
+      properties:
+        name:
+          type: string
+        headcount:
+          type: integer
+      required:
+        - name
+        - headcount
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        departmentId:
+          type: integer
+        departmentName:
+          type: string
+        status:
+          type: string
+          enum: [open, closed, paused]
+        seniority:
+          type: string
+          enum: [junior, pleno, senior, especialista, gerente, diretor]
+        minSalary:
+          type: number
+        maxSalary:
+          type: number
+        location:
+          type: string
+        workMode:
+          type: string
+          enum: [presencial, hibrido, remoto]
+        requirements:
+          type: string
+          nullable: true
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        candidateCount:
+          type: integer
+        daysOpen:
+          type: integer
+      required:
+        - id
+        - title
+        - departmentId
+        - departmentName
+        - status
+        - seniority
+        - minSalary
+        - maxSalary
+        - location
+        - workMode
+        - openedAt
+        - candidateCount
+        - daysOpen
+
+    JobDetail:
+      allOf:
+        - $ref: "#/components/schemas/Job"
+        - type: object
+          properties:
+            candidates:
+              type: array
+              items:
+                $ref: "#/components/schemas/Candidate"
+          required:
+            - candidates
+
+    CreateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        departmentId:
+          type: integer
+        status:
+          type: string
+          enum: [open, closed, paused]
+        seniority:
+          type: string
+          enum: [junior, pleno, senior, especialista, gerente, diretor]
+        minSalary:
+          type: number
+        maxSalary:
+          type: number
+        location:
+          type: string
+        workMode:
+          type: string
+          enum: [presencial, hibrido, remoto]
+        requirements:
+          type: string
+          nullable: true
+      required:
+        - title
+        - departmentId
+        - status
+        - seniority
+        - minSalary
+        - maxSalary
+        - location
+        - workMode
+
+    UpdateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        departmentId:
+          type: integer
+        status:
+          type: string
+          enum: [open, closed, paused]
+        seniority:
+          type: string
+          enum: [junior, pleno, senior, especialista, gerente, diretor]
+        minSalary:
+          type: number
+        maxSalary:
+          type: number
+        location:
+          type: string
+        workMode:
+          type: string
+          enum: [presencial, hibrido, remoto]
+        requirements:
+          type: string
+          nullable: true
+
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        stage:
+          type: string
+          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+        source:
+          type: string
+          enum: [linkedin, indicacao, site, outro]
+        appliedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+      required:
+        - id
+        - jobId
+        - name
+        - email
+        - stage
+        - source
+        - appliedAt
+        - updatedAt
+
+    CreateCandidateBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        stage:
+          type: string
+          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+        source:
+          type: string
+          enum: [linkedin, indicacao, site, outro]
+        notes:
+          type: string
+          nullable: true
+      required:
+        - name
+        - email
+        - stage
+        - source
+
+    UpdateCandidateBody:
+      type: object
+      properties:
+        stage:
+          type: string
+          enum: [triagem, entrevista_rh, entrevista_tecnica, proposta, contratado, reprovado]
+        notes:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+
+    MetricsOverview:
+      type: object
+      properties:
+        totalOpenJobs:
+          type: integer
+        totalCandidates:
+          type: integer
+        avgTimeToHireDays:
+          type: number
+        hiresThisMonth:
+          type: integer
+        hiresLastMonth:
+          type: integer
+        openJobsGrowth:
+          type: number
+        candidatesGrowth:
+          type: number
+        totalOpenJobsCost:
+          type: number
+      required:
+        - totalOpenJobs
+        - totalCandidates
+        - avgTimeToHireDays
+        - hiresThisMonth
+        - hiresLastMonth
+        - openJobsGrowth
+        - candidatesGrowth
+        - totalOpenJobsCost
+
+    TimeToHireByDept:
+      type: object
+      properties:
+        department:
+          type: string
+        avgDays:
+          type: number
+        hires:
+          type: integer
+      required:
+        - department
+        - avgDays
+        - hires
+
+    FunnelStage:
+      type: object
+      properties:
+        stage:
+          type: string
+        label:
+          type: string
+        count:
+          type: integer
+        conversionRate:
+          type: number
+      required:
+        - stage
+        - label
+        - count
+        - conversionRate
+
+    MonthlyHires:
+      type: object
+      properties:
+        month:
+          type: string
+        hires:
+          type: integer
+        openings:
+          type: integer
+      required:
+        - month
+        - hires
+        - openings
+
+    OpenJobsCostReport:
+      type: object
+      properties:
+        totalMonthlyCost:
+          type: number
+        totalWeeklyCost:
+          type: number
+        totalDailyCost:
+          type: number
+        chargesRate:
+          type: number
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobCostItem"
+      required:
+        - totalMonthlyCost
+        - totalWeeklyCost
+        - totalDailyCost
+        - chargesRate
+        - jobs
+
+    JobCostItem:
+      type: object
+      properties:
+        jobId:
+          type: integer
+        jobTitle:
+          type: string
+        department:
+          type: string
+        daysOpen:
+          type: integer
+        avgSalary:
+          type: number
+        monthlyCost:
+          type: number
+        weeklyCost:
+          type: number
+        dailyCost:
+          type: number
+        totalAccruedCost:
+          type: number
+      required:
+        - jobId
+        - jobTitle
+        - department
+        - daysOpen
+        - avgSalary
+        - monthlyCost
+        - weeklyCost
+        - dailyCost
+        - totalAccruedCost
+
+    SalaryBenchmark:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobTitle:
+          type: string
+        seniority:
+          type: string
+        region:
+          type: string
+        minSalary:
+          type: number
+        medianSalary:
+          type: number
+        maxSalary:
+          type: number
+        sampleSize:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - jobTitle
+        - seniority
+        - region
+        - minSalary
+        - medianSalary
+        - maxSalary
+        - sampleSize
+        - updatedAt
