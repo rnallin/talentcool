@@ -1,0 +1,23 @@
+packages:
+  "framer-motion": "For high-quality scroll reveals and page transitions"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For merging tailwind classes safely"
+
+images:
+  - path: "artifacts/landing/public/images/hero-mockup.png"
+    description: "A beautiful, modern SaaS dashboard interface showing an HR platform with purple and violet accents on a clean white background. Features subtle 3D depth, clean typography, and kanban-style cards."
+    aspect_ratio: "16:9"
+  - path: "artifacts/landing/public/images/pipeline-mockup.png"
+    description: "A clean software UI mockup of a candidate hiring pipeline kanban board, with columns for screening, interviewing, and hired. Clean minimal design with violet accents."
+    aspect_ratio: "4:3"
+  - path: "artifacts/landing/public/images/metrics-mockup.png"
+    description: "A modern analytics dashboard UI mockup showing bar charts, line graphs, and donut charts in shades of purple, violet, and white. Clean, minimal corporate style."
+    aspect_ratio: "4:3"
+  - path: "artifacts/landing/public/images/benchmark-mockup.png"
+    description: "A sleek web application interface showing salary comparison bands and sliders. Professional, clean, modern design with purple primary colors on a white card."
+    aspect_ratio: "4:3"
+
+notes:
+  - Landing page only, no backend integration required.
+  - Using framer-motion for scroll animations.
+  - Using custom Violet/Purple color scheme inspired by gojiberry.ai.

@@ -185,8 +185,8 @@ export default function Dashboard() {
                 >
                   <defs>
                     <linearGradient id="colorHires" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0d9488" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -214,7 +214,7 @@ export default function Dashboard() {
                     type="monotone"
                     dataKey="hires"
                     name="Contratações"
-                    stroke="#0d9488"
+                    stroke="#7c3aed"
                     strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#colorHires)"

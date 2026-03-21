@@ -1,0 +1,68 @@
+import streamlit as st
+
+# Configuração da Página
+st.set_page_config(page_title="Calculadora de CoV 2026", page_icon="💰")
+
+st.title("📊 Calculadora de Cost of Vacancy (CoV)")
+st.markdown("""
+Entenda o prejuízo financeiro real de ter uma vaga aberta na sua empresa. 
+Dados baseados em benchmarks de mercado LATAM 2025/2026.
+""")
+
+---
+
+# Sidebar para inputs
+st.sidebar.header("Configurações da Vaga")
+
+cargo = st.sidebar.text_input("Nome do Cargo", "Executivo de Vendas")
+salario_mensal = st.sidebar.number_input("Salário Mensal Bruto (R$)", value=8000, step=500)
+encargos_percentual = st.sidebar.slider("Encargos e Benefícios (%)", 40, 100, 75)
+dias_vaga_aberta = st.sidebar.number_input("Dias de Vaga Aberta", value=30, step=1)
+
+# Seleção do Fator de Produtividade baseado na importância do cargo
+fator_map = {
+    "Suporte/Adm (Baixo Impacto)": 1.5,
+    "Técnico/Especialista (Médio Impacto)": 2.5,
+    "Vendas/Liderança/TI (Alto Impacto)": 4.0
+}
+impacto_selecionado = st.sidebar.selectbox("Impacto da Vaga na Receita", list(fator_map.keys()))
+fator_produtividade = fator_map[impacto_selecionado]
+
+---
+
+# Lógica do Cálculo
+# Custo Total Mensal (Salário + Encargos)
+custo_mensal_total = salario_mensal * (1 + encargos_percentual/100)
+
+# Valor gerado pelo colaborador por dia (benchmark 2026)
+valor_diario_perdido = (custo_mensal_total * fator_produtividade) / 22
+
+# Prejuízo Total Acumulado
+prejuizo_total = valor_diario_perdido * dias_vaga_aberta
+
+---
+
+# Exibição dos Resultados
+st.subheader(f"Análise para: {cargo}")
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Custo Mensal Real", f"R$ {custo_mensal_total:,.2f}")
+col2.metric("Perda Diária", f"R$ {valor_diario_perdido:,.2f}", delta_color="inverse")
+col3.metric("Prejuízo Acumulado", f"R$ {prejuizo_total:,.2f}", delta="- Perda Crítica", delta_color="inverse")
+
+st.warning(f"⚠️ Sua empresa está deixando de gerar **R$ {prejuizo_total:,.2f}** em valor/receita devido à vacância desta posição.")
+
+---
+
+# Seção de ROI do seu Aplicativo
+st.info("💡 **Como meu aplicativo resolve isso:**")
+reducao_dias = 15 # Exemplo: sua ferramenta acelera em 15 dias a contratação
+economia_estimada = valor_diario_perdido * reducao_dias
+
+st.write(f"""
+Ao utilizar nossa plataforma de automação, você reduz o tempo médio de contratação em **{reducao_dias} dias**.
+**Economia Direta Estimada: R$ {economia_estimada:,.2f} por vaga.**
+""")
+
+if st.button("Gerar Relatório em PDF (Demo)"):
+    st.write("Funcionalidade de exportação sendo processada...")
