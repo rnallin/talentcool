@@ -3,7 +3,7 @@
     "id": "9f61f7eb-1ace-47f3-b8d5-9d5413e1282a",
     "position": 1,
     "filepath": "src/pages/slides/TitleSlide.tsx",
-    "title": "TalentOS",
+    "title": "Talent Cool",
     "description": "Slide de abertura com titulo, tagline e imagem de fundo.",
     "speakerNotes": ""
   },
@@ -28,7 +28,7 @@
     "position": 4,
     "filepath": "src/pages/slides/SolucaoSlide.tsx",
     "title": "A Solucao",
-    "description": "TalentOS como plataforma all-in-one inteligente para RH de PMEs.",
+    "description": "Talent Cool como plataforma all-in-one inteligente para RH de PMEs.",
     "speakerNotes": ""
   },
   {

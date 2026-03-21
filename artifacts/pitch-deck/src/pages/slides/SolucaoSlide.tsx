@@ -19,7 +19,7 @@ export default function SolucaoSlide() {
                   <path d="M7 16l4-8 4 4 4-6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <span className="text-[2.5vw] font-extrabold text-[#145338] tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>TalentOS</span>
+              <span className="text-[2.5vw] font-extrabold text-[#145338] tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>Talent Cool</span>
             </div>
 
             <h2 className="text-[3.5vw] font-extrabold text-[#0c1f15] leading-[1.05] mb-[3vh]" style={{ fontFamily: "'Inter', sans-serif" }}>

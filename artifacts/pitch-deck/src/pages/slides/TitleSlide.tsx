@@ -20,7 +20,7 @@ export default function TitleSlide() {
               <path d="M7 16l4-8 4 4 4-6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span className="text-[2vw] font-extrabold text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>TalentOS</span>
+          <span className="text-[2vw] font-extrabold text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>Talent Cool</span>
         </div>
 
         <div className="max-w-[55vw]">

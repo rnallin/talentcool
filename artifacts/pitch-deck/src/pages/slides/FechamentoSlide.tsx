@@ -13,7 +13,7 @@ export default function FechamentoSlide() {
               <path d="M7 16l4-8 4 4 4-6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span className="text-[3vw] font-extrabold text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>TalentOS</span>
+          <span className="text-[3vw] font-extrabold text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>Talent Cool</span>
         </div>
 
         <h2 className="text-[4.5vw] font-black text-white leading-[1.05] max-w-[65vw] mb-[3vh]" style={{ fontFamily: "'Inter', sans-serif" }}>
