@@ -67,6 +67,30 @@ router.get("/metrics/overview", async (req, res) => {
       return sum + avgSalary * (1 + chargesRate);
     }, 0);
 
+    const workingDaysRow = await db
+      .select({ value: companySettingsTable.value })
+      .from(companySettingsTable)
+      .where(eq(companySettingsTable.key, "working_days_per_month"))
+      .limit(1);
+    const workingDays = parseInt(workingDaysRow[0]?.value ?? "22");
+
+    const hiredWithJobs = hired.length > 0
+      ? await db
+          .select({ minSalary: jobsTable.minSalary, maxSalary: jobsTable.maxSalary, appliedAt: candidatesTable.appliedAt, updatedAt: candidatesTable.updatedAt })
+          .from(candidatesTable)
+          .leftJoin(jobsTable, eq(candidatesTable.jobId, jobsTable.id))
+          .where(eq(candidatesTable.stage, "contratado"))
+      : [];
+
+    const costPerHire = hiredWithJobs.length > 0
+      ? parseFloat((hiredWithJobs.reduce((sum, h) => {
+          const avgSalary = ((parseFloat(h.minSalary as string) + parseFloat(h.maxSalary as string)) / 2);
+          const daysToHire = Math.max(1, Math.floor((h.updatedAt.getTime() - h.appliedAt.getTime()) / (1000 * 60 * 60 * 24)));
+          const dailyCost = avgSalary * (1 + chargesRate) / workingDays;
+          return sum + dailyCost * daysToHire;
+        }, 0) / hiredWithJobs.length).toFixed(2))
+      : 0;
+
     const [promotersResult] = await db
       .select({ count: sql<number>`cast(count(*) as int)` })
       .from(candidatesTable)
@@ -95,6 +119,7 @@ router.get("/metrics/overview", async (req, res) => {
       candidatesGrowth: 0,
       totalOpenJobsCost: parseFloat(totalOpenJobsCost.toFixed(2)),
       candidateNps,
+      costPerHire,
     });
   } catch (err) {
     req.log.error(err);

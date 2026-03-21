@@ -141,8 +141,8 @@ export default function Dashboard() {
           inverseTrend
         />
         <MetricCard
-          title="Custo Vagas em Aberto"
-          value={metrics.totalOpenJobsCost}
+          title="Custo por Contratação"
+          value={metrics.costPerHire}
           icon={DollarSign}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-600"

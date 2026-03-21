@@ -293,6 +293,11 @@ export const GetMetricsOverviewResponse = zod.object({
     .describe(
       "Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio",
     ),
+  costPerHire: zod
+    .number()
+    .describe(
+      "Average cost per hired candidate (avg salary × (1 + chargesRate) × avgTimeToHireDays \/ workingDays)",
+    ),
 });
 
 /**

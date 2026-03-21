@@ -760,6 +760,9 @@ components:
         candidateNps:
           type: number
           description: Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio
+        costPerHire:
+          type: number
+          description: Average cost per hired candidate (avg salary × (1 + chargesRate) × avgTimeToHireDays / workingDays)
       required:
         - totalOpenJobs
         - totalCandidates
@@ -770,6 +773,7 @@ components:
         - candidatesGrowth
         - totalOpenJobsCost
         - candidateNps
+        - costPerHire
 
     TimeToHireByDept:
       type: object

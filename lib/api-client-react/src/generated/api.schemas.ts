@@ -220,6 +220,8 @@ export interface MetricsOverview {
   totalOpenJobsCost: number;
   /** Candidate Net Promoter Score (-100 to 100) based on hired vs rejected ratio */
   candidateNps: number;
+  /** Average cost per hired candidate (avg salary × (1 + chargesRate) × avgTimeToHireDays / workingDays) */
+  costPerHire: number;
 }
 
 export interface TimeToHireByDept {

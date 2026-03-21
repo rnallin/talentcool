@@ -13,6 +13,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -206,6 +207,20 @@ export default function Jobs() {
                     </FormItem>
                   )} />
                 </div>
+
+                <FormField control={form.control} name="requirements" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Requisitos</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Liste os requisitos, competências e qualificações desejadas para a vaga..."
+                        className="rounded-xl resize-none min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
                 
                 <DialogFooter className="pt-4 border-t border-border">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">Cancelar</Button>
