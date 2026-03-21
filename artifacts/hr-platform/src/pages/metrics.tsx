@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   useGetTimeToHireMetrics,
   useGetFunnelMetrics,
@@ -18,8 +19,6 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   CartesianGrid,
-  Funnel,
-  FunnelChart,
   LabelList,
   Line,
   LineChart,
@@ -35,7 +34,7 @@ import {
 } from "recharts";
 import type { TooltipProps } from "recharts";
 import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
-import { Zap, Star } from "lucide-react";
+import { Zap, Star, ChevronDown, Users, TrendingDown } from "lucide-react";
 
 function CustomTooltip({ active, payload, label }: TooltipProps<ValueType, NameType>) {
   if (active && payload && payload.length) {
@@ -76,6 +75,126 @@ function CurrencyTooltip({ active, payload, label }: TooltipProps<ValueType, Nam
     );
   }
   return null;
+}
+
+const FUNNEL_COLORS = [
+  "from-indigo-500 to-indigo-600",
+  "from-violet-500 to-violet-600",
+  "from-purple-500 to-purple-600",
+  "from-fuchsia-500 to-fuchsia-600",
+  "from-pink-500 to-rose-500",
+  "from-slate-500 to-slate-600",
+];
+
+const FUNNEL_BG = [
+  "bg-gradient-to-r from-indigo-500 to-indigo-600",
+  "bg-gradient-to-r from-violet-500 to-violet-600",
+  "bg-gradient-to-r from-purple-500 to-purple-600",
+  "bg-gradient-to-r from-fuchsia-500 to-fuchsia-600",
+  "bg-gradient-to-r from-pink-500 to-rose-500",
+  "bg-gradient-to-r from-slate-500 to-slate-600",
+];
+
+function FunnelViz({ stages }: { stages: FunnelStage[] }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const maxCount = stages[0]?.count ?? 1;
+
+  return (
+    <div className="w-full space-y-0">
+      {stages.map((stage, i) => {
+        const widthPct = 25 + Math.round((stage.count / maxCount) * 75);
+        const prev = i > 0 ? stages[i - 1] : null;
+        const dropOff = prev && prev.count > 0
+          ? Math.round(((prev.count - stage.count) / prev.count) * 100)
+          : null;
+        const isSelected = selected === i;
+        const isLast = i === stages.length - 1;
+
+        return (
+          <div key={stage.stage} className="flex flex-col items-stretch">
+            {dropOff !== null && (
+              <div className="flex justify-center items-center py-1">
+                <div className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full px-2.5 py-0.5">
+                  <TrendingDown className="w-3 h-3 text-rose-400" />
+                  <span className="text-[10px] font-semibold text-rose-400">−{dropOff}% descartados</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => setSelected(isSelected ? null : i)}
+              className="group relative flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all duration-200 text-left"
+            >
+              <div className="w-28 shrink-0 text-right">
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {stage.label}
+                </span>
+              </div>
+
+              <div className="flex-1 flex justify-center">
+                <div
+                  className={`relative h-10 rounded-lg transition-all duration-300 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-indigo-500/20" : ""}`}
+                  style={{ width: `${widthPct}%` }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-between px-3">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-white/70" />
+                      <span className="text-white font-bold text-sm">{stage.count}</span>
+                    </div>
+                    <span className="text-white/80 text-xs font-medium">{stage.conversionRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-6 shrink-0 flex justify-center">
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 ${isSelected ? "rotate-180" : ""}`}
+                />
+              </div>
+            </button>
+
+            {isSelected && (
+              <div className="mx-2 mb-1 mt-0.5 p-4 bg-card border border-border rounded-xl text-sm space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="font-semibold text-foreground flex items-center gap-2">
+                  <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${FUNNEL_COLORS[i] ?? FUNNEL_COLORS[FUNNEL_COLORS.length - 1]}`} />
+                  {stage.label}
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-muted/40 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-foreground">{stage.count}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">candidatos</div>
+                  </div>
+                  <div className="bg-muted/40 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-foreground">{stage.conversionRate}%</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">taxa geral</div>
+                  </div>
+                  <div className="bg-muted/40 rounded-lg p-3 text-center">
+                    {dropOff !== null ? (
+                      <>
+                        <div className="text-2xl font-bold text-rose-400">{dropOff}%</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">descartados</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold text-emerald-400">—</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">etapa inicial</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {!isLast && stages[i + 1] && (
+                  <p className="text-xs text-muted-foreground">
+                    Da etapa seguinte (<strong className="text-foreground">{stages[i + 1]!.label}</strong>): apenas{" "}
+                    <strong className="text-foreground">{stages[i + 1]!.count}</strong> candidatos avançaram.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 const STATIC_SOURCE_OF_HIRE = [
@@ -226,29 +345,18 @@ export default function Metrics() {
 
         {/* Funnel */}
         <Card className="shadow-sm border-border rounded-xl">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Funil de Conversão Global</CardTitle>
+            <p className="text-xs text-muted-foreground">Clique em uma etapa para ver detalhes</p>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="90%">
-                <FunnelChart>
-                  <RechartsTooltip content={<CustomTooltip />} />
-                  <Funnel dataKey="count" data={funnelData} isAnimationActive>
-                    <LabelList position="right" fill="#000" stroke="none" dataKey="label" fontSize={13} fontWeight={500} />
-                  </Funnel>
-                </FunnelChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2 justify-center">
-              {funnelData.map((f, i) => (
-                <div key={i} className="flex items-center text-xs">
-                  <div className="w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: f.fill }} />
-                  <span className="text-muted-foreground mr-1">{f.label}:</span>
-                  <span className="font-semibold">{f.count}</span>
-                </div>
-              ))}
-            </div>
+          <CardContent className="pt-2 pb-4">
+            {funnelData.length > 0 ? (
+              <FunnelViz stages={funnelData} />
+            ) : (
+              <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
+                Sem dados de funil disponíveis.
+              </div>
+            )}
           </CardContent>
         </Card>
 
