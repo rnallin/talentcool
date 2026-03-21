@@ -154,9 +154,9 @@ export default function Emails() {
           <Mail className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-foreground">E-mails Internos</h1>
+          <h1 className="text-xl font-semibold text-foreground">Reporting</h1>
           <p className="text-sm text-muted-foreground">
-            Envie relatórios, métricas e insights por e-mail
+            Envie relatórios, métricas e insights por e-mail para sua equipe
           </p>
         </div>
       </div>
