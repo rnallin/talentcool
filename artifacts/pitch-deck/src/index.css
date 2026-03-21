@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --brand-primary: #145338;
+  --brand-accent: #2d8a5e;
+  --brand-dark: #0a2e1f;
+  --brand-light: #e8f5ee;
+  --text-primary: #0c1f15;
+  --text-secondary: #4a5d52;
+  --bg-warm: #f7faf8;
+
+  font-family: "Inter", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-warm);
+  color: var(--text-primary);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
