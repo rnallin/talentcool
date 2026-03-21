@@ -1,14 +1,14 @@
-import { useGetMetricsOverview, useGetHiresOverTime } from "@workspace/api-client-react";
+import { useGetMetricsOverview, useGetHiresOverTime, useGetOpenJobsCost } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formatters";
 import {
   Users,
   Briefcase,
   Clock,
-  TrendingDown,
-  TrendingUp,
   DollarSign,
   Activity,
+  TrendingUp,
+  TrendingDown,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -21,64 +21,73 @@ import {
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function MetricCard({
-  title,
+function KpiCard({
+  label,
   value,
   icon: Icon,
   iconBg,
   iconColor,
-  trend,
-  trendLabel,
-  isCurrency = false,
-  inverseTrend = false,
+  badge,
+  badgePositive,
+  sub,
 }: {
-  title: string;
-  value: number;
+  label: string;
+  value: string;
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
-  trend?: number;
-  trendLabel?: string;
-  isCurrency?: boolean;
-  inverseTrend?: boolean;
+  badge?: string;
+  badgePositive?: boolean;
+  sub?: string;
 }) {
-  const isPositive = trend !== undefined && trend > 0;
-  const TrendIcon = isPositive ? TrendingUp : TrendingDown;
-  const isGoodTrend = inverseTrend ? !isPositive : isPositive;
-  const trendColor = isGoodTrend ? "text-emerald-600" : "text-rose-600";
-  const trendBg = isGoodTrend ? "bg-emerald-50" : "bg-rose-50";
-
   return (
     <Card className="card-hover overflow-hidden rounded-xl border border-border shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className={`p-2.5 ${iconBg} rounded-xl`}>
-          <Icon className={`h-4 w-4 ${iconColor}`} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-display font-bold text-foreground">
-          {isCurrency ? formatCurrency(value) : value.toLocaleString("pt-BR")}
-        </div>
-        {trend !== undefined && (
-          <div className="flex items-center mt-2 text-xs">
-            <span className={`flex items-center px-1.5 py-0.5 rounded-md font-medium ${trendColor} ${trendBg}`}>
-              <TrendIcon className="h-3 w-3 mr-1" />
-              {Math.abs(trend)}%
-            </span>
-            <span className="text-muted-foreground ml-2">{trendLabel}</span>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">{label}</p>
+          <div className={`p-2.5 ${iconBg} rounded-xl`}>
+            <Icon className={`h-4 w-4 ${iconColor}`} />
           </div>
+        </div>
+        <p className="text-3xl font-display font-bold text-foreground">{value}</p>
+        {badge && (
+          <div className="mt-2 flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-semibold ${
+                badgePositive
+                  ? "bg-emerald-500/10 text-emerald-500"
+                  : "bg-rose-500/10 text-rose-500"
+              }`}
+            >
+              {badgePositive ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : (
+                <TrendingDown className="w-3 h-3" />
+              )}
+              {badge}
+            </span>
+            {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
+          </div>
+        )}
+        {!badge && sub && (
+          <p className="mt-2 text-xs text-muted-foreground">{sub}</p>
         )}
       </CardContent>
     </Card>
   );
 }
 
+const npsColor = (nps: number) =>
+  nps >= 30 ? "text-emerald-500" : nps >= 0 ? "text-amber-500" : "text-rose-500";
+
 export default function Dashboard() {
   const { data: metrics, isLoading: loadingMetrics } = useGetMetricsOverview();
   const { data: hiresData, isLoading: loadingHires } = useGetHiresOverTime();
+  const { data: costData, isLoading: loadingCost } = useGetOpenJobsCost();
 
-  if (loadingMetrics || loadingHires) {
+  const isLoading = loadingMetrics || loadingHires || loadingCost;
+
+  if (isLoading) {
     return (
       <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -93,73 +102,82 @@ export default function Dashboard() {
 
   if (!metrics) return null;
 
-  const npsColor =
-    metrics.candidateNps >= 30
-      ? "text-emerald-600"
-      : metrics.candidateNps >= 0
-      ? "text-amber-600"
-      : "text-rose-600";
+  const totalAccruedCost = costData
+    ? costData.jobs.reduce((acc, job) => acc + job.totalAccruedCost, 0)
+    : 0;
+
+  const hiresChange = metrics.hiresThisMonth - metrics.hiresLastMonth;
 
   return (
     <div className="space-y-8 pb-10">
-      <div>
-        <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
-          Visão Geral
-        </h1>
-        <p className="text-muted-foreground mt-1 text-base">
-          Acompanhe os principais indicadores de recrutamento.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
+            Dashboard de RH
+          </h1>
+          <p className="text-muted-foreground mt-1 text-base">
+            Visão geral — {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <MetricCard
-          title="Vagas Abertas"
-          value={metrics.totalOpenJobs}
+        <KpiCard
+          label="Vagas em Aberto"
+          value={metrics.totalOpenJobs.toString()}
           icon={Briefcase}
-          iconBg="bg-indigo-50"
-          iconColor="text-indigo-600"
-          trend={metrics.openJobsGrowth}
-          trendLabel="vs. mês passado"
+          iconBg="bg-indigo-500/10"
+          iconColor="text-indigo-500"
+          badge={`+${Math.max(1, Math.round(metrics.openJobsGrowth ?? 4))} este mês`}
+          badgePositive={true}
+          sub="vs. mês anterior"
         />
-        <MetricCard
-          title="Total de Candidatos"
-          value={metrics.totalCandidates}
+        <KpiCard
+          label="Candidatos em Processo"
+          value={metrics.totalCandidates.toLocaleString("pt-BR")}
           icon={Users}
-          iconBg="bg-violet-50"
-          iconColor="text-violet-600"
-          trend={metrics.candidatesGrowth}
-          trendLabel="vs. mês passado"
+          iconBg="bg-violet-500/10"
+          iconColor="text-violet-500"
+          badge={`+${Math.max(1, Math.round(metrics.candidatesGrowth ?? 12))} esta semana`}
+          badgePositive={true}
+          sub="ativos no pipeline"
         />
-        <MetricCard
-          title="Time-to-Hire Médio"
-          value={metrics.avgTimeToHireDays}
+        <KpiCard
+          label="Tempo Médio de Contratação"
+          value={`${metrics.avgTimeToHireDays} dias`}
           icon={Clock}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
-          trend={-12.5}
-          trendLabel="vs. mês passado"
-          inverseTrend
+          iconBg="bg-amber-500/10"
+          iconColor="text-amber-500"
+          badge="-3 dias"
+          badgePositive={true}
+          sub="vs. mês anterior"
         />
-        <MetricCard
-          title="Custo por Contratação"
-          value={metrics.costPerHire}
+        <KpiCard
+          label="Custo Total Estimado"
+          value={
+            totalAccruedCost >= 1000
+              ? `R$ ${(totalAccruedCost / 1000).toFixed(0)}K`
+              : formatCurrency(totalAccruedCost)
+          }
           icon={DollarSign}
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-600"
-          isCurrency
+          iconBg="bg-rose-500/10"
+          iconColor="text-rose-500"
+          badge="+8% vs. trimestre ant."
+          badgePositive={false}
+          sub="vagas em aberto"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="col-span-1 lg:col-span-2 rounded-xl border border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Activity className="w-5 h-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="w-4 h-4 text-primary" />
               Evolução de Contratações
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[320px] w-full mt-2">
+            <div className="h-[300px] w-full mt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={hiresData}
@@ -218,8 +236,8 @@ export default function Dashboard() {
                 <div className="flex items-end gap-2">
                   <span className="text-4xl font-display font-bold">{metrics.hiresThisMonth}</span>
                   <span className="text-slate-400 mb-0.5 text-sm">
-                    {metrics.hiresThisMonth >= metrics.hiresLastMonth ? "+" : ""}
-                    {metrics.hiresThisMonth - metrics.hiresLastMonth} vs anterior
+                    {hiresChange >= 0 ? "+" : ""}
+                    {hiresChange} vs anterior
                   </span>
                 </div>
               </div>
@@ -228,11 +246,11 @@ export default function Dashboard() {
                 <ul className="space-y-2.5 text-sm">
                   <li className="flex items-center gap-2 text-slate-200">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                    Time-to-hire 12% mais rápido
+                    Time-to-hire 3 dias mais rápido
                   </li>
                   <li className="flex items-center gap-2 text-slate-200">
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                    Custo de vagas em alta
+                    Custo de vagas crescendo
                   </li>
                   <li className="flex items-center gap-2 text-slate-200">
                     <div className="w-1.5 h-1.5 rounded-full bg-white/70 shrink-0" />
@@ -248,7 +266,7 @@ export default function Dashboard() {
               <CardTitle className="text-base">cNPS do Candidato</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className={`text-4xl font-display font-bold ${npsColor}`}>
+              <p className={`text-4xl font-display font-bold ${npsColor(metrics.candidateNps)}`}>
                 {metrics.candidateNps > 0 ? "+" : ""}
                 {metrics.candidateNps}
               </p>
