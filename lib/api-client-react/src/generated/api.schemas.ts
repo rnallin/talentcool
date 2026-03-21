@@ -306,6 +306,50 @@ export interface SalaryBenchmark {
   updatedAt: string;
 }
 
+export interface PipelineStage {
+  id: number;
+  /** Machine-readable stage key (e.g. triagem) */
+  name: string;
+  /** Human-readable stage label */
+  label: string;
+  /** Tailwind color classes for this stage */
+  color: string;
+  /** Display order (ascending) */
+  position: number;
+  /** Whether this is a final/terminal stage */
+  isTerminal: boolean;
+  createdAt: string;
+}
+
+export interface CreatePipelineStageBody {
+  name: string;
+  label: string;
+  color?: string;
+  position?: number;
+  isTerminal?: boolean;
+}
+
+export interface UpdatePipelineStageBody {
+  label?: string;
+  color?: string;
+  position?: number;
+  isTerminal?: boolean;
+}
+
+export interface CompanySettings {
+  /** Employer charges rate applied on top of salary (e.g. 0.68 = 68%) */
+  chargesRate: number;
+  /** Working days per month used in cost calculations */
+  workingDaysPerMonth: number;
+  companyName: string;
+}
+
+export interface UpdateCompanySettingsBody {
+  chargesRate?: number;
+  workingDaysPerMonth?: number;
+  companyName?: string;
+}
+
 export type ListJobsParams = {
   status?: ListJobsStatus;
   departmentId?: number;

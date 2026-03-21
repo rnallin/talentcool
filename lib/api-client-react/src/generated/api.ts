@@ -18,9 +18,11 @@ import type {
 
 import type {
   Candidate,
+  CompanySettings,
   CreateCandidateBody,
   CreateDepartmentBody,
   CreateJobBody,
+  CreatePipelineStageBody,
   Department,
   ErrorResponse,
   FunnelStage,
@@ -32,10 +34,13 @@ import type {
   MetricsOverview,
   MonthlyHires,
   OpenJobsCostReport,
+  PipelineStage,
   SalaryBenchmark,
   TimeToHireByDept,
   UpdateCandidateBody,
+  UpdateCompanySettingsBody,
   UpdateJobBody,
+  UpdatePipelineStageBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -1673,3 +1678,497 @@ export function useListBenchmarkJobTitles<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all pipeline stages ordered by position
+ */
+export const getListPipelineStagesUrl = () => {
+  return `/api/pipeline/stages`;
+};
+
+export const listPipelineStages = async (
+  options?: RequestInit,
+): Promise<PipelineStage[]> => {
+  return customFetch<PipelineStage[]>(getListPipelineStagesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListPipelineStagesQueryKey = () => {
+  return [`/api/pipeline/stages`] as const;
+};
+
+export const getListPipelineStagesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listPipelineStages>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPipelineStages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListPipelineStagesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listPipelineStages>>
+  > = ({ signal }) => listPipelineStages({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listPipelineStages>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListPipelineStagesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listPipelineStages>>
+>;
+export type ListPipelineStagesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all pipeline stages ordered by position
+ */
+
+export function useListPipelineStages<
+  TData = Awaited<ReturnType<typeof listPipelineStages>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listPipelineStages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListPipelineStagesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a new pipeline stage
+ */
+export const getCreatePipelineStageUrl = () => {
+  return `/api/pipeline/stages`;
+};
+
+export const createPipelineStage = async (
+  createPipelineStageBody: CreatePipelineStageBody,
+  options?: RequestInit,
+): Promise<PipelineStage> => {
+  return customFetch<PipelineStage>(getCreatePipelineStageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createPipelineStageBody),
+  });
+};
+
+export const getCreatePipelineStageMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPipelineStage>>,
+    TError,
+    { data: BodyType<CreatePipelineStageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createPipelineStage>>,
+  TError,
+  { data: BodyType<CreatePipelineStageBody> },
+  TContext
+> => {
+  const mutationKey = ["createPipelineStage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createPipelineStage>>,
+    { data: BodyType<CreatePipelineStageBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createPipelineStage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreatePipelineStageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createPipelineStage>>
+>;
+export type CreatePipelineStageMutationBody = BodyType<CreatePipelineStageBody>;
+export type CreatePipelineStageMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a new pipeline stage
+ */
+export const useCreatePipelineStage = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPipelineStage>>,
+    TError,
+    { data: BodyType<CreatePipelineStageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createPipelineStage>>,
+  TError,
+  { data: BodyType<CreatePipelineStageBody> },
+  TContext
+> => {
+  return useMutation(getCreatePipelineStageMutationOptions(options));
+};
+
+/**
+ * @summary Update a pipeline stage
+ */
+export const getUpdatePipelineStageUrl = (id: number) => {
+  return `/api/pipeline/stages/${id}`;
+};
+
+export const updatePipelineStage = async (
+  id: number,
+  updatePipelineStageBody: UpdatePipelineStageBody,
+  options?: RequestInit,
+): Promise<PipelineStage> => {
+  return customFetch<PipelineStage>(getUpdatePipelineStageUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updatePipelineStageBody),
+  });
+};
+
+export const getUpdatePipelineStageMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePipelineStage>>,
+    TError,
+    { id: number; data: BodyType<UpdatePipelineStageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updatePipelineStage>>,
+  TError,
+  { id: number; data: BodyType<UpdatePipelineStageBody> },
+  TContext
+> => {
+  const mutationKey = ["updatePipelineStage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updatePipelineStage>>,
+    { id: number; data: BodyType<UpdatePipelineStageBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updatePipelineStage(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdatePipelineStageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updatePipelineStage>>
+>;
+export type UpdatePipelineStageMutationBody = BodyType<UpdatePipelineStageBody>;
+export type UpdatePipelineStageMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update a pipeline stage
+ */
+export const useUpdatePipelineStage = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePipelineStage>>,
+    TError,
+    { id: number; data: BodyType<UpdatePipelineStageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updatePipelineStage>>,
+  TError,
+  { id: number; data: BodyType<UpdatePipelineStageBody> },
+  TContext
+> => {
+  return useMutation(getUpdatePipelineStageMutationOptions(options));
+};
+
+/**
+ * @summary Delete a pipeline stage
+ */
+export const getDeletePipelineStageUrl = (id: number) => {
+  return `/api/pipeline/stages/${id}`;
+};
+
+export const deletePipelineStage = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeletePipelineStageUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeletePipelineStageMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePipelineStage>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deletePipelineStage>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deletePipelineStage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deletePipelineStage>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deletePipelineStage(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeletePipelineStageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deletePipelineStage>>
+>;
+
+export type DeletePipelineStageMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a pipeline stage
+ */
+export const useDeletePipelineStage = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePipelineStage>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deletePipelineStage>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeletePipelineStageMutationOptions(options));
+};
+
+/**
+ * @summary Get company settings
+ */
+export const getGetCompanySettingsUrl = () => {
+  return `/api/settings`;
+};
+
+export const getCompanySettings = async (
+  options?: RequestInit,
+): Promise<CompanySettings> => {
+  return customFetch<CompanySettings>(getGetCompanySettingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCompanySettingsQueryKey = () => {
+  return [`/api/settings`] as const;
+};
+
+export const getGetCompanySettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCompanySettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCompanySettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCompanySettingsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCompanySettings>>
+  > = ({ signal }) => getCompanySettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCompanySettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCompanySettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCompanySettings>>
+>;
+export type GetCompanySettingsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get company settings
+ */
+
+export function useGetCompanySettings<
+  TData = Awaited<ReturnType<typeof getCompanySettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCompanySettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCompanySettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update company settings
+ */
+export const getUpdateCompanySettingsUrl = () => {
+  return `/api/settings`;
+};
+
+export const updateCompanySettings = async (
+  updateCompanySettingsBody: UpdateCompanySettingsBody,
+  options?: RequestInit,
+): Promise<CompanySettings> => {
+  return customFetch<CompanySettings>(getUpdateCompanySettingsUrl(), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCompanySettingsBody),
+  });
+};
+
+export const getUpdateCompanySettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCompanySettings>>,
+    TError,
+    { data: BodyType<UpdateCompanySettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCompanySettings>>,
+  TError,
+  { data: BodyType<UpdateCompanySettingsBody> },
+  TContext
+> => {
+  const mutationKey = ["updateCompanySettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCompanySettings>>,
+    { data: BodyType<UpdateCompanySettingsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateCompanySettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCompanySettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCompanySettings>>
+>;
+export type UpdateCompanySettingsMutationBody =
+  BodyType<UpdateCompanySettingsBody>;
+export type UpdateCompanySettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update company settings
+ */
+export const useUpdateCompanySettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCompanySettings>>,
+    TError,
+    { data: BodyType<UpdateCompanySettingsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCompanySettings>>,
+  TError,
+  { data: BodyType<UpdateCompanySettingsBody> },
+  TContext
+> => {
+  return useMutation(getUpdateCompanySettingsMutationOptions(options));
+};

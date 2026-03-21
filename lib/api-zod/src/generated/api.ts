@@ -413,3 +413,97 @@ export const ListBenchmarkJobTitlesResponseItem = zod.string();
 export const ListBenchmarkJobTitlesResponse = zod.array(
   ListBenchmarkJobTitlesResponseItem,
 );
+
+/**
+ * @summary List all pipeline stages ordered by position
+ */
+export const ListPipelineStagesResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string().describe("Machine-readable stage key (e.g. triagem)"),
+  label: zod.string().describe("Human-readable stage label"),
+  color: zod.string().describe("Tailwind color classes for this stage"),
+  position: zod.number().describe("Display order (ascending)"),
+  isTerminal: zod.boolean().describe("Whether this is a final\/terminal stage"),
+  createdAt: zod.date(),
+});
+export const ListPipelineStagesResponse = zod.array(
+  ListPipelineStagesResponseItem,
+);
+
+/**
+ * @summary Create a new pipeline stage
+ */
+export const CreatePipelineStageBody = zod.object({
+  name: zod.string(),
+  label: zod.string(),
+  color: zod.string().optional(),
+  position: zod.number().optional(),
+  isTerminal: zod.boolean().optional(),
+});
+
+/**
+ * @summary Update a pipeline stage
+ */
+export const UpdatePipelineStageParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdatePipelineStageBody = zod.object({
+  label: zod.string().optional(),
+  color: zod.string().optional(),
+  position: zod.number().optional(),
+  isTerminal: zod.boolean().optional(),
+});
+
+export const UpdatePipelineStageResponse = zod.object({
+  id: zod.number(),
+  name: zod.string().describe("Machine-readable stage key (e.g. triagem)"),
+  label: zod.string().describe("Human-readable stage label"),
+  color: zod.string().describe("Tailwind color classes for this stage"),
+  position: zod.number().describe("Display order (ascending)"),
+  isTerminal: zod.boolean().describe("Whether this is a final\/terminal stage"),
+  createdAt: zod.date(),
+});
+
+/**
+ * @summary Delete a pipeline stage
+ */
+export const DeletePipelineStageParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Get company settings
+ */
+export const GetCompanySettingsResponse = zod.object({
+  chargesRate: zod
+    .number()
+    .describe(
+      "Employer charges rate applied on top of salary (e.g. 0.68 = 68%)",
+    ),
+  workingDaysPerMonth: zod
+    .number()
+    .describe("Working days per month used in cost calculations"),
+  companyName: zod.string(),
+});
+
+/**
+ * @summary Update company settings
+ */
+export const UpdateCompanySettingsBody = zod.object({
+  chargesRate: zod.number().optional(),
+  workingDaysPerMonth: zod.number().optional(),
+  companyName: zod.string().optional(),
+});
+
+export const UpdateCompanySettingsResponse = zod.object({
+  chargesRate: zod
+    .number()
+    .describe(
+      "Employer charges rate applied on top of salary (e.g. 0.68 = 68%)",
+    ),
+  workingDaysPerMonth: zod
+    .number()
+    .describe("Working days per month used in cost calculations"),
+  companyName: zod.string(),
+});

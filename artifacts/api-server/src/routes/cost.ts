@@ -1,13 +1,34 @@
 import { Router, type IRouter } from "express";
-import { db, jobsTable, departmentsTable } from "@workspace/db";
+import { db, jobsTable, departmentsTable, companySettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-const CHARGES_RATE = 0.68;
+async function getChargesRate(): Promise<number> {
+  const [row] = await db
+    .select()
+    .from(companySettingsTable)
+    .where(eq(companySettingsTable.key, "charges_rate"))
+    .limit(1);
+  return parseFloat(row?.value ?? "0.68");
+}
+
+async function getWorkingDays(): Promise<number> {
+  const [row] = await db
+    .select()
+    .from(companySettingsTable)
+    .where(eq(companySettingsTable.key, "working_days_per_month"))
+    .limit(1);
+  return parseInt(row?.value ?? "22");
+}
 
 router.get("/cost/open-jobs", async (req, res) => {
   try {
+    const [chargesRate, workingDays] = await Promise.all([
+      getChargesRate(),
+      getWorkingDays(),
+    ]);
+
     const openJobs = await db
       .select({
         job: jobsTable,
@@ -26,8 +47,8 @@ router.get("/cost/open-jobs", async (req, res) => {
       const maxSalary = parseFloat(r.job.maxSalary as string);
       const avgSalary = (minSalary + maxSalary) / 2;
 
-      const monthlyCost = avgSalary * (1 + CHARGES_RATE);
-      const dailyCost = monthlyCost / 22; // working days
+      const monthlyCost = avgSalary * (1 + chargesRate);
+      const dailyCost = monthlyCost / workingDays;
       const weeklyCost = dailyCost * 5;
       const totalAccruedCost = dailyCost * daysOpen;
 
@@ -52,7 +73,7 @@ router.get("/cost/open-jobs", async (req, res) => {
       totalMonthlyCost: parseFloat(totalMonthlyCost.toFixed(2)),
       totalWeeklyCost: parseFloat(totalWeeklyCost.toFixed(2)),
       totalDailyCost: parseFloat(totalDailyCost.toFixed(2)),
-      chargesRate: CHARGES_RATE,
+      chargesRate,
       jobs: jobCosts,
     });
   } catch (err) {

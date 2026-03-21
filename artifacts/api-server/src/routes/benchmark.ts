@@ -1,21 +1,25 @@
 import { Router, type IRouter } from "express";
 import { db, benchmarksTable } from "@workspace/db";
-import { ilike, sql } from "drizzle-orm";
+import { ilike, and, SQL } from "drizzle-orm";
 
 const router: IRouter = Router();
 
 router.get("/benchmark", async (req, res) => {
   try {
-    let query = db.select().from(benchmarksTable).$dynamic();
+    const conditions: SQL[] = [];
 
-    if (req.query.region) {
-      query = query.where(ilike(benchmarksTable.region, `%${req.query.region}%`));
+    if (req.query.region && typeof req.query.region === "string") {
+      conditions.push(ilike(benchmarksTable.region, `%${req.query.region}%`));
     }
-    if (req.query.jobTitle) {
-      query = query.where(ilike(benchmarksTable.jobTitle, `%${req.query.jobTitle}%`));
+    if (req.query.jobTitle && typeof req.query.jobTitle === "string") {
+      conditions.push(ilike(benchmarksTable.jobTitle, `%${req.query.jobTitle}%`));
     }
 
-    const benchmarks = await query.orderBy(benchmarksTable.jobTitle, benchmarksTable.seniority);
+    const benchmarks = await db
+      .select()
+      .from(benchmarksTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(benchmarksTable.jobTitle, benchmarksTable.seniority);
 
     res.json(
       benchmarks.map((b) => ({

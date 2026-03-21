@@ -23,6 +23,8 @@ tags:
     description: Job cost calculations
   - name: benchmark
     description: Salary benchmarking by region
+  - name: settings
+    description: Company settings and configuration
 
 paths:
   /healthz:
@@ -383,6 +385,106 @@ paths:
                 type: array
                 items:
                   type: string
+
+  /pipeline/stages:
+    get:
+      operationId: listPipelineStages
+      tags: [pipeline]
+      summary: List all pipeline stages ordered by position
+      responses:
+        "200":
+          description: List of pipeline stages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStage"
+    post:
+      operationId: createPipelineStage
+      tags: [pipeline]
+      summary: Create a new pipeline stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePipelineStageBody"
+      responses:
+        "201":
+          description: Created pipeline stage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PipelineStage"
+
+  /pipeline/stages/{id}:
+    patch:
+      operationId: updatePipelineStage
+      tags: [pipeline]
+      summary: Update a pipeline stage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePipelineStageBody"
+      responses:
+        "200":
+          description: Updated pipeline stage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PipelineStage"
+    delete:
+      operationId: deletePipelineStage
+      tags: [pipeline]
+      summary: Delete a pipeline stage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /settings:
+    get:
+      operationId: getCompanySettings
+      tags: [settings]
+      summary: Get company settings
+      responses:
+        "200":
+          description: Current company settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanySettings"
+    patch:
+      operationId: updateCompanySettings
+      tags: [settings]
+      summary: Update company settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanySettingsBody"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanySettings"
 
 components:
   schemas:
@@ -800,3 +902,90 @@ components:
         - maxSalary
         - sampleSize
         - updatedAt
+
+    PipelineStage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Machine-readable stage key (e.g. triagem)
+        label:
+          type: string
+          description: Human-readable stage label
+        color:
+          type: string
+          description: Tailwind color classes for this stage
+        position:
+          type: integer
+          description: Display order (ascending)
+        isTerminal:
+          type: boolean
+          description: Whether this is a final/terminal stage
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - label
+        - color
+        - position
+        - isTerminal
+        - createdAt
+
+    CreatePipelineStageBody:
+      type: object
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        color:
+          type: string
+        position:
+          type: integer
+        isTerminal:
+          type: boolean
+      required:
+        - name
+        - label
+
+    UpdatePipelineStageBody:
+      type: object
+      properties:
+        label:
+          type: string
+        color:
+          type: string
+        position:
+          type: integer
+        isTerminal:
+          type: boolean
+
+    CompanySettings:
+      type: object
+      properties:
+        chargesRate:
+          type: number
+          description: Employer charges rate applied on top of salary (e.g. 0.68 = 68%)
+        workingDaysPerMonth:
+          type: integer
+          description: Working days per month used in cost calculations
+        companyName:
+          type: string
+      required:
+        - chargesRate
+        - workingDaysPerMonth
+        - companyName
+
+    UpdateCompanySettingsBody:
+      type: object
+      properties:
+        chargesRate:
+          type: number
+        workingDaysPerMonth:
+          type: integer
+        companyName:
+          type: string

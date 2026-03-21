@@ -4,6 +4,22 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## TalentOS — HR Platform (pt-BR)
+
+4-module HR platform for SMBs: job openings & Kanban hiring pipeline, open position cost calculation, HR performance metrics, and strategic salary benchmarking by Brazilian region.
+
+### DB Tables
+- `departments`, `jobs`, `candidates`, `benchmarks` — core data
+- `pipeline_stages` — configurable Kanban columns (6 default stages), CRUD via `/api/pipeline/stages`
+- `company_settings` — key/value config (charges_rate, working_days_per_month, company_name), CRUD via `/api/settings`
+
+### Key Design Decisions
+- Pipeline stages are dynamic (DB-driven), not hardcoded in the frontend
+- Cost calculations use `charges_rate` from `company_settings` table (not hardcoded constant)
+- Benchmark filter uses `and(...conditions)` for correct SQL predicate composition
+- API codegen (Orval) runs from `lib/api-spec/openapi.yaml`; after codegen, fix `lib/api-zod/src/index.ts` to export only `./generated/api`
+- After adding new DB schema tables, run `pnpm --filter @workspace/db push` then build libs with `npx tsc -p tsconfig.json` in each lib dir
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces
