@@ -116,7 +116,8 @@ router.get("/jobs/:id", async (req, res) => {
       .limit(1);
 
     if (!rows.length) {
-      return res.status(404).json({ error: "Job not found" });
+      res.status(404).json({ error: "Job not found" });
+      return;
     }
 
     const candidates = await db
@@ -177,7 +178,8 @@ router.patch("/jobs/:id", async (req, res) => {
       .returning();
 
     if (!updated) {
-      return res.status(404).json({ error: "Job not found" });
+      res.status(404).json({ error: "Job not found" });
+      return;
     }
 
     const dept = await db

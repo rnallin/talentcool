@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useRoute } from "wouter";
 import { useGetJob, useUpdateCandidate, useCreateCandidate } from "@workspace/api-client-react";
-import type { Candidate, CreateCandidateBody } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { Candidate, CreateCandidateBody } from "@workspace/api-client-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

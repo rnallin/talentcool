@@ -78,7 +78,8 @@ router.patch("/candidates/:id", async (req, res) => {
       .returning();
 
     if (!updated) {
-      return res.status(404).json({ error: "Candidate not found" });
+      res.status(404).json({ error: "Candidate not found" });
+      return;
     }
 
     res.json(candidateToResponse(updated));

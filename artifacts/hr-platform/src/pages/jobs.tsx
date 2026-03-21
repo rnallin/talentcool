@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useListJobs, useCreateJob, useListDepartments } from "@workspace/api-client-react";
-import type { Job, CreateJobBody } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { Job, CreateJobBody } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
