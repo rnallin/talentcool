@@ -56,57 +56,57 @@
 }
 
 :root {
-  /* TalentoCost Design System */
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  /* Design System — Neutral / Lavender */
+  --background: 120 5% 96%;
+  --foreground: 150 33% 2%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 90%;
+  --card-foreground: 150 33% 2%;
+  --card-border: 219 16% 88%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 90%;
+  --popover-foreground: 150 33% 2%;
+  --popover-border: 219 16% 88%;
 
-  /* Primary: Violet (inspired by Gojiberry) */
-  --primary: 263 84% 58%;
+  /* Primary: Muted Lavender */
+  --primary: 240 19% 53%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary: Slate */
-  --secondary: 214 32% 91%;
-  --secondary-foreground: 215 25% 27%;
+  /* Secondary */
+  --secondary: 219 16% 92%;
+  --secondary-foreground: 150 3% 30%;
 
-  --muted: 210 20% 95%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 120 4% 93%;
+  --muted-foreground: 150 3% 36%;
 
-  --accent: 263 84% 96%;
-  --accent-foreground: 263 84% 40%;
+  --accent: 304 27% 94%;
+  --accent-foreground: 304 27% 40%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 214 32% 90%;
-  --input: 214 32% 90%;
-  --ring: 263 84% 58%;
+  --border: 219 16% 88%;
+  --input: 219 16% 88%;
+  --ring: 240 19% 53%;
 
-  /* Sidebar: Slate-900 dark */
-  --sidebar-background: 222 47% 11%;
-  --sidebar-foreground: 210 40% 95%;
-  --sidebar-primary: 243 75% 59%;
+  /* Sidebar: Near-black */
+  --sidebar-background: 150 33% 2%;
+  --sidebar-foreground: 120 5% 92%;
+  --sidebar-primary: 240 19% 53%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 17%;
-  --sidebar-accent-foreground: 210 40% 95%;
-  --sidebar-border: 217 25% 20%;
-  --sidebar-ring: 243 75% 59%;
+  --sidebar-accent: 240 12% 12%;
+  --sidebar-accent-foreground: 120 5% 92%;
+  --sidebar-border: 240 8% 16%;
+  --sidebar-ring: 240 19% 53%;
 
   --radius: 0.75rem;
 
   /* Chart colors */
-  --chart-1: 243 75% 59%;
-  --chart-2: 175 77% 32%;
+  --chart-1: 240 19% 53%;
+  --chart-2: 304 27% 54%;
   --chart-3: 156 72% 45%;
   --chart-4: 43 96% 56%;
-  --chart-5: 340 82% 52%;
+  --chart-5: 340 60% 55%;
 
   /* Shadows */
   --shadow-card: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);

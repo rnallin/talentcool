@@ -42,7 +42,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#70709F] to-[#AC69A8] rounded-xl flex items-center justify-center shadow-lg shadow-[#70709F]/20">
                 <Briefcase className="text-white w-5 h-5" />
               </div>
               <span className="font-display font-bold text-xl tracking-tight">TalentOS</span>
@@ -84,8 +84,8 @@ export default function Home() {
       <section className="pt-32 pb-20 md:pt-48 md:pb-32 px-4 relative">
         {/* Background Gradients */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] overflow-hidden -z-10 pointer-events-none">
-          <div className="absolute top-[-20%] left-[20%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px]" />
-          <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] rounded-full bg-fuchsia-500/10 blur-[120px]" />
+          <div className="absolute top-[-20%] left-[20%] w-[500px] h-[500px] rounded-full bg-[#70709F]/8 blur-[100px]" />
+          <div className="absolute top-[10%] right-[10%] w-[600px] h-[600px] rounded-full bg-[#AC69A8]/8 blur-[120px]" />
         </div>
 
         <div className="max-w-7xl mx-auto">
@@ -101,7 +101,7 @@ export default function Home() {
             </motion.div>
             
             <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-              Contrate os melhores <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-fuchsia-500">talentos com inteligência</span>
+              Contrate os melhores <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#70709F] to-[#AC69A8]">talentos com inteligência</span>
             </motion.h1>
             
             <motion.p variants={fadeIn} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -125,7 +125,7 @@ export default function Home() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="mt-20 relative mx-auto max-w-5xl"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-fuchsia-500 rounded-3xl blur opacity-20" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#70709F] to-[#AC69A8] rounded-3xl blur opacity-15" />
             <img 
               src={`${import.meta.env.BASE_URL}images/hero-mockup.png`} 
               alt="Dashboard TalentOS" 
@@ -208,8 +208,7 @@ export default function Home() {
 
       {/* Metrics Highlights */}
       <section id="metrics" className="py-20 bg-primary text-primary-foreground relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop')] opacity-10 bg-cover bg-center mix-blend-overlay" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-purple-900/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#70709F] via-[#70709F] to-[#443334]" />
         
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/10">
@@ -270,7 +269,7 @@ export default function Home() {
               className="lg:w-1/2"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-2xl transform translate-x-4 translate-y-4" />
+                <div className="absolute inset-0 bg-[#70709F]/15 rounded-3xl blur-2xl transform translate-x-4 translate-y-4" />
                 <img 
                   src={`${import.meta.env.BASE_URL}images/pipeline-mockup.png`} 
                   alt="Pipeline Kanban" 
@@ -313,7 +312,7 @@ export default function Home() {
               className="lg:w-1/2"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-fuchsia-500/20 rounded-3xl blur-2xl transform -translate-x-4 translate-y-4" />
+                <div className="absolute inset-0 bg-[#AC69A8]/15 rounded-3xl blur-2xl transform -translate-x-4 translate-y-4" />
                 <img 
                   src={`${import.meta.env.BASE_URL}images/metrics-mockup.png`} 
                   alt="Métricas e Custos" 
@@ -356,7 +355,7 @@ export default function Home() {
               className="lg:w-1/2"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-2xl transform translate-x-4 -translate-y-4" />
+                <div className="absolute inset-0 bg-[#70709F]/15 rounded-3xl blur-2xl transform translate-x-4 -translate-y-4" />
                 <img 
                   src={`${import.meta.env.BASE_URL}images/benchmark-mockup.png`} 
                   alt="Benchmarking Salarial" 
@@ -454,7 +453,7 @@ export default function Home() {
 
             {/* Pro Plan */}
             <div className="bg-card rounded-3xl p-8 border-2 border-primary shadow-xl relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-[#70709F] to-[#AC69A8] text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                 MAIS POPULAR
               </div>
               <h3 className="text-2xl font-bold mb-2">Pro</h3>
@@ -479,8 +478,8 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-24 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-primary" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-700 to-slate-900" />
+        <div className="absolute inset-0 bg-[#70709F]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#70709F] via-[#5A5F5B] to-[#030504]" />
         {/* Abstract pattern */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent bg-[length:20px_20px]" />
         

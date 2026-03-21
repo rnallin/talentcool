@@ -18,7 +18,7 @@ import {
 } from "recharts";
 
 const COST_DISTRIBUTION = [
-  { name: "Custo de Oportunidade", value: 65, color: "#6366f1" },
+  { name: "Custo de Oportunidade", value: 65, color: "#70709F" },
   { name: "Recrutador/RH", value: 18, color: "#a78bfa" },
   { name: "Agências", value: 11, color: "#3b82f6" },
   { name: "Ferramentas", value: 4, color: "#06b6d4" },
@@ -110,16 +110,16 @@ export default function Costs() {
           value={formatCurrency(totalAccruedCost)}
           sub={`${costData.jobs.length} vagas ativas`}
           icon={DollarSign}
-          iconBg="bg-indigo-50"
-          iconColor="text-indigo-600"
+          iconBg="bg-[#70709F]/10"
+          iconColor="text-[#70709F]"
         />
         <KpiCard
           label="Custo Médio por Vaga"
           value={formatCurrency(avgCostPerJob)}
           sub="Média geral"
           icon={Calculator}
-          iconBg="bg-violet-50"
-          iconColor="text-violet-600"
+          iconBg="bg-[#AC69A8]/10"
+          iconColor="text-[#AC69A8]"
         />
         <KpiCard
           label="Custo de Oportunidade"
@@ -179,7 +179,7 @@ export default function Costs() {
                     }}
                   />
                   <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Oportunidade" stackId="a" fill="#6366f1" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Oportunidade" stackId="a" fill="#70709F" radius={[0, 0, 0, 0]} />
                   <Bar dataKey="Recrutador" stackId="a" fill="#a78bfa" />
                   <Bar dataKey="Agência" stackId="a" fill="#3b82f6" />
                   <Bar dataKey="Anúncio" stackId="a" fill="#f59e0b" />
@@ -232,11 +232,11 @@ export default function Costs() {
         </Card>
       </div>
 
-      <div className="flex items-start gap-2 p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl text-sm">
-        <AlertCircle className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-2 p-4 bg-[#70709F]/10 border border-[#70709F]/20 rounded-xl text-sm">
+        <AlertCircle className="h-4 w-4 text-[#70709F] mt-0.5 shrink-0" />
         <div>
-          <p className="font-semibold text-indigo-900">Como calculamos?</p>
-          <p className="text-indigo-700 mt-0.5">
+          <p className="font-semibold text-foreground">Como calculamos?</p>
+          <p className="text-muted-foreground mt-0.5">
             Baseado no salário médio de mercado + encargos ({(costData.chargesRate * 100).toFixed(0)}%) por dia útil.
             Representa o custo de oportunidade e produtividade perdida por posição não preenchida.
           </p>

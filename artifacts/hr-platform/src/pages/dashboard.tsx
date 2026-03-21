@@ -126,8 +126,8 @@ export default function Dashboard() {
           label="Vagas em Aberto"
           value={metrics.totalOpenJobs.toString()}
           icon={Briefcase}
-          iconBg="bg-indigo-500/10"
-          iconColor="text-indigo-500"
+          iconBg="bg-[#70709F]/10"
+          iconColor="text-[#70709F]"
           badge={`+${Math.max(1, Math.round(metrics.openJobsGrowth ?? 4))} este mês`}
           badgePositive={true}
           sub="vs. mês anterior"
@@ -136,8 +136,8 @@ export default function Dashboard() {
           label="Candidatos em Processo"
           value={metrics.totalCandidates.toLocaleString("pt-BR")}
           icon={Users}
-          iconBg="bg-violet-500/10"
-          iconColor="text-violet-500"
+          iconBg="bg-[#AC69A8]/10"
+          iconColor="text-[#AC69A8]"
           badge={`+${Math.max(1, Math.round(metrics.candidatesGrowth ?? 12))} esta semana`}
           badgePositive={true}
           sub="ativos no pipeline"
@@ -185,8 +185,8 @@ export default function Dashboard() {
                 >
                   <defs>
                     <linearGradient id="colorHires" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#70709F" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#70709F" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -214,7 +214,7 @@ export default function Dashboard() {
                     type="monotone"
                     dataKey="hires"
                     name="Contratações"
-                    stroke="#7c3aed"
+                    stroke="#70709F"
                     strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#colorHires)"
