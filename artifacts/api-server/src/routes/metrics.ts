@@ -29,6 +29,40 @@ router.get("/metrics/overview", async (req, res) => {
       .select({ count: sql<number>`cast(count(*) as int)` })
       .from(candidatesTable);
 
+    const [newJobsThisMonthResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(jobsTable)
+      .where(sql`${jobsTable.openedAt} >= ${startOfMonth}`);
+
+    const [newJobsLastMonthResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(jobsTable)
+      .where(and(
+        sql`${jobsTable.openedAt} >= ${startOfLastMonth}`,
+        sql`${jobsTable.openedAt} <= ${endOfLastMonth}`
+      ));
+
+    const [candidatesThisMonthResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(candidatesTable)
+      .where(sql`${candidatesTable.appliedAt} >= ${startOfMonth}`);
+
+    const [candidatesLastMonthResult] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(candidatesTable)
+      .where(and(
+        sql`${candidatesTable.appliedAt} >= ${startOfLastMonth}`,
+        sql`${candidatesTable.appliedAt} <= ${endOfLastMonth}`
+      ));
+
+    function computeGrowth(current: number, previous: number): number {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return parseFloat(((current - previous) / previous * 100).toFixed(1));
+    }
+
+    const openJobsGrowth = computeGrowth(newJobsThisMonthResult.count, newJobsLastMonthResult.count);
+    const candidatesGrowth = computeGrowth(candidatesThisMonthResult.count, candidatesLastMonthResult.count);
+
     const hired = await db
       .select({
         appliedAt: candidatesTable.appliedAt,
@@ -115,8 +149,8 @@ router.get("/metrics/overview", async (req, res) => {
       avgTimeToHireDays: parseFloat(avgTimeToHire.toFixed(1)),
       hiresThisMonth,
       hiresLastMonth,
-      openJobsGrowth: 0,
-      candidatesGrowth: 0,
+      openJobsGrowth,
+      candidatesGrowth,
       totalOpenJobsCost: parseFloat(totalOpenJobsCost.toFixed(2)),
       candidateNps,
       costPerHire,

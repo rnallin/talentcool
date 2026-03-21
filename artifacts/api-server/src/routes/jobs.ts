@@ -105,6 +105,7 @@ router.post("/jobs", async (req, res) => {
 router.get("/jobs/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
     const rows = await db
       .select({
         job: jobsTable,
@@ -153,6 +154,7 @@ router.get("/jobs/:id", async (req, res) => {
 router.patch("/jobs/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
     const body = UpdateJobBody.parse(req.body);
 
     const updateData: Record<string, unknown> = {};
@@ -203,6 +205,7 @@ router.patch("/jobs/:id", async (req, res) => {
 router.delete("/jobs/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
     await db.delete(candidatesTable).where(eq(candidatesTable.jobId, id));
     await db.delete(jobsTable).where(eq(jobsTable.id, id));
     res.status(204).send();

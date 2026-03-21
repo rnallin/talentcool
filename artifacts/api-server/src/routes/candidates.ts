@@ -28,6 +28,7 @@ function candidateToResponse(c: typeof candidatesTable.$inferSelect) {
 router.get("/jobs/:id/candidates", async (req, res) => {
   try {
     const jobId = parseInt(req.params.id);
+    if (isNaN(jobId)) { res.status(400).json({ error: "ID inválido" }); return; }
     const candidates = await db
       .select()
       .from(candidatesTable)
@@ -50,6 +51,7 @@ router.post("/jobs/:id/candidates", async (req, res) => {
 
   try {
     const jobId = parseInt(req.params.id);
+    if (isNaN(jobId)) { res.status(400).json({ error: "ID inválido" }); return; }
     const body = parsed.data;
 
     const validStages = await getValidStageNames();
@@ -89,6 +91,7 @@ router.patch("/candidates/:id", async (req, res) => {
 
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
     const body = parsed.data;
 
     if (body.stage !== undefined) {
@@ -127,6 +130,7 @@ router.patch("/candidates/:id", async (req, res) => {
 router.delete("/candidates/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
     await db.delete(candidatesTable).where(eq(candidatesTable.id, id));
     res.status(204).send();
   } catch (err) {

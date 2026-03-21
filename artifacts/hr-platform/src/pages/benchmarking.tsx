@@ -57,11 +57,27 @@ export default function Benchmarking() {
     b.jobTitle.toLowerCase().includes(search.toLowerCase())
   );
 
+  function scoreBenchmarkMatch(benchmarkTitle: string, jobTitle: string): number {
+    const bt = benchmarkTitle.toLowerCase();
+    const jt = jobTitle.toLowerCase();
+    if (bt === jt) return 100;
+    const jobWords = jt.split(/\s+/).filter((w) => w.length > 2);
+    const matchCount = jobWords.filter((w) => bt.includes(w)).length;
+    return jobWords.length > 0 ? matchCount / jobWords.length : 0;
+  }
+
   const comparisonRows = openJobs?.map((job) => {
     const offeredMid = (job.minSalary + job.maxSalary) / 2;
-    const match = benchmarks?.find(
-      (b) => b.jobTitle.toLowerCase().includes(job.title.split(" ")[0].toLowerCase())
-    );
+    let bestMatch = null;
+    let bestScore = 0;
+    for (const b of benchmarks ?? []) {
+      const score = scoreBenchmarkMatch(b.jobTitle, job.title);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = b;
+      }
+    }
+    const match = bestScore > 0 ? bestMatch : null;
     const marketMedian = match?.medianSalary ?? null;
     const delta = marketMedian ? ((offeredMid - marketMedian) / marketMedian) * 100 : null;
     return { job, offeredMid, marketMedian, delta };
