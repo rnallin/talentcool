@@ -11,6 +11,7 @@ import JobPipeline from "@/pages/job-pipeline";
 import Costs from "@/pages/costs";
 import Metrics from "@/pages/metrics";
 import Benchmarking from "@/pages/benchmarking";
+import Assistant from "@/pages/assistant";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/custo" component={Costs} />
         <Route path="/metricas" component={Metrics} />
         <Route path="/benchmarking" component={Benchmarking} />
+        <Route path="/assistente" component={Assistant} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

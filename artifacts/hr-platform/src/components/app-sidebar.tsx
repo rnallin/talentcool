@@ -8,8 +8,7 @@ import {
   LogOut,
   Settings,
   HelpCircle,
-  FileText,
-  MessageSquare,
+  Sparkles,
 } from "lucide-react";
 
 const generalItems = [
@@ -21,6 +20,7 @@ const generalItems = [
 const toolItems = [
   { title: "Custo de Vagas", url: "/custo", icon: Calculator },
   { title: "Benchmarking", url: "/benchmarking", icon: LineChart },
+  { title: "Assistente IA", url: "/assistente", icon: Sparkles },
 ];
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {

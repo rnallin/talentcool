@@ -8,6 +8,7 @@ import costRouter from "./cost";
 import benchmarkRouter from "./benchmark";
 import pipelineRouter from "./pipeline";
 import settingsRouter from "./settings";
+import aiRouter from "./ai";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(costRouter);
 router.use(benchmarkRouter);
 router.use(pipelineRouter);
 router.use(settingsRouter);
+router.use(aiRouter);
 
 export default router;
