@@ -82,7 +82,7 @@ function buildReportHtml(data: Awaited<ReturnType<typeof getOverviewData>>) {
 <body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f9fafb;margin:0;padding:0;">
 <div style="max-width:640px;margin:0 auto;background:#fff;">
   <div style="background:#145338;padding:32px 24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:24px;">TalentOS — Relatório de RH</h1>
+    <h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool — Relatório de RH</h1>
     <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:14px;">${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</p>
   </div>
 
@@ -149,7 +149,7 @@ function buildReportHtml(data: Awaited<ReturnType<typeof getOverviewData>>) {
   </div>
 
   <div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">
-    Enviado automaticamente pela plataforma TalentOS
+    Enviado automaticamente pela plataforma Talent Cool
   </div>
 </div>
 </body>
@@ -194,14 +194,14 @@ function buildInsightsHtml(data: Awaited<ReturnType<typeof getOverviewData>>) {
 <body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f9fafb;margin:0;padding:0;">
 <div style="max-width:640px;margin:0 auto;background:#fff;">
   <div style="background:#145338;padding:32px 24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:24px;">TalentOS — Insights & Alertas</h1>
+    <h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool — Insights & Alertas</h1>
     <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:14px;">${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</p>
   </div>
   <div style="padding:24px;">
     <ul style="list-style:none;padding:0;margin:0;font-size:14px;">${insightItems}</ul>
   </div>
   <div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">
-    Enviado automaticamente pela plataforma TalentOS
+    Enviado automaticamente pela plataforma Talent Cool
   </div>
 </div>
 </body>
@@ -250,11 +250,11 @@ router.post("/email/send", async (req, res) => {
 <body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f9fafb;margin:0;padding:0;">
 <div style="max-width:640px;margin:0 auto;background:#fff;">
   <div style="background:#145338;padding:32px 24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:24px;">TalentOS</h1>
+    <h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool</h1>
   </div>
   <div style="padding:24px;font-size:14px;line-height:1.7;color:#333;">${customHtml}</div>
   <div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">
-    Enviado pela plataforma TalentOS
+    Enviado pela plataforma Talent Cool
   </div>
 </div>
 </body>
@@ -267,7 +267,7 @@ router.post("/email/send", async (req, res) => {
     const { client, fromEmail } = await getResendClient();
 
     const result = await client.emails.send({
-      from: fromEmail || "TalentOS <onboarding@resend.dev>",
+      from: fromEmail || "Talent Cool <onboarding@resend.dev>",
       to: recipients,
       subject,
       html,

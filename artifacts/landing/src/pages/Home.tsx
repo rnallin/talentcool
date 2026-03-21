@@ -45,7 +45,7 @@ export default function Home() {
               <div className="w-10 h-10 bg-gradient-to-br from-[#145338] to-[#2d8a5e] rounded-xl flex items-center justify-center shadow-lg shadow-[#145338]/20">
                 <Briefcase className="text-white w-5 h-5" />
               </div>
-              <span className="font-display font-bold text-xl tracking-tight">TalentOS</span>
+              <span className="font-display font-bold text-xl tracking-tight">Talent Cool</span>
             </div>
             
             <div className="hidden md:flex items-center gap-8">
@@ -128,7 +128,7 @@ export default function Home() {
             <div className="absolute -inset-1 bg-gradient-to-r from-[#145338] to-[#2d8a5e] rounded-3xl blur opacity-15" />
             <img 
               src={`${import.meta.env.BASE_URL}images/hero-mockup.png`} 
-              alt="Dashboard TalentOS" 
+              alt="Dashboard Talent Cool" 
               className="relative rounded-3xl shadow-2xl border border-border/50 bg-background w-full object-cover"
             />
           </motion.div>
@@ -156,7 +156,7 @@ export default function Home() {
       <section id="features" className="py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Descubra como o TalentOS funciona</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Descubra como o Talent Cool funciona</h2>
             <p className="text-muted-foreground text-lg">Processo simples em 3 etapas para preencher posições produtivas vazias mais rápido do que nunca.</p>
           </div>
 
@@ -373,7 +373,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">O que dizem os líderes de RH</h2>
-            <p className="text-muted-foreground text-lg">Empresas que transformaram seus processos seletivos com o TalentOS.</p>
+            <p className="text-muted-foreground text-lg">Empresas que transformaram seus processos seletivos com o Talent Cool.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -507,7 +507,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Briefcase className="text-white w-4 h-4" />
               </div>
-              <span className="font-display font-bold text-xl">TalentOS</span>
+              <span className="font-display font-bold text-xl">Talent Cool</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
               A plataforma definitiva para times de recrutamento de alta performance.
@@ -547,7 +547,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2026 TalentOS Tecnologia. Todos os direitos reservados.
+            © 2026 Talent Cool Tecnologia. Todos os direitos reservados.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground">Termos de Uso</a>

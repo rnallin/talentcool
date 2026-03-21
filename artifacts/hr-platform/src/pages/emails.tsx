@@ -40,7 +40,7 @@ const TEMPLATES: Array<{
   {
     id: "custom",
     label: "E-mail Personalizado",
-    desc: "Escreva seu próprio conteúdo com template TalentOS",
+    desc: "Escreva seu próprio conteúdo com template Talent Cool",
     icon: PenLine,
   },
 ];
@@ -80,7 +80,7 @@ export default function Emails() {
 
   async function handlePreview() {
     if (selectedTemplate === "custom") {
-      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body style="font-family:'Segoe UI',sans-serif;background:#f9fafb;margin:0;padding:0;"><div style="max-width:640px;margin:0 auto;background:#fff;"><div style="background:#145338;padding:32px 24px;text-align:center;"><h1 style="color:#fff;margin:0;font-size:24px;">TalentOS</h1></div><div style="padding:24px;font-size:14px;line-height:1.7;color:#333;">${customHtml}</div><div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">Enviado pela plataforma TalentOS</div></div></body></html>`;
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body style="font-family:'Segoe UI',sans-serif;background:#f9fafb;margin:0;padding:0;"><div style="max-width:640px;margin:0 auto;background:#fff;"><div style="background:#145338;padding:32px 24px;text-align:center;"><h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool</h1></div><div style="padding:24px;font-size:14px;line-height:1.7;color:#333;">${customHtml}</div><div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">Enviado pela plataforma Talent Cool</div></div></body></html>`;
       setPreviewHtml(html);
       setShowPreview(true);
       return;

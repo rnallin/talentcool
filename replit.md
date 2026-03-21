@@ -4,7 +4,7 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
-## TalentOS — HR Platform (pt-BR)
+## Talent Cool — HR Platform (pt-BR)
 
 4-module HR platform for SMBs: job openings & Kanban hiring pipeline, open position cost calculation, HR performance metrics, and strategic salary benchmarking by Brazilian region.
 
@@ -102,11 +102,11 @@ Color palette (Dribbble-inspired clean dashboard):
 - Backend: POST /api/email/send and /api/email/preview
 - Uses Replit connector credentials for Resend (auto-managed API key)
 - Input validation: email format check, max 10 recipients
-- Email HTML templates with TalentOS green branding (#145338)
+- Email HTML templates with Talent Cool green branding (#145338)
 
 ### Landing Page (`artifacts/landing`)
 
-TalentOS marketing landing page with hero, features, metrics, testimonials, pricing, footer — all in pt-BR with green accent palette matching the platform.
+Talent Cool marketing landing page with hero, features, metrics, testimonials, pricing, footer — all in pt-BR with green accent palette matching the platform.
 
 ### `artifacts/api-server` (`@workspace/api-server`)
 

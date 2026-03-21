@@ -83,7 +83,7 @@ async function gatherPlatformData() {
   };
 }
 
-const SYSTEM_PROMPT = `Você é o assistente de IA da plataforma TalentOS, um sistema de gestão de RH para empresas brasileiras.
+const SYSTEM_PROMPT = `Você é o assistente de IA da plataforma Talent Cool, um sistema de gestão de RH para empresas brasileiras.
 
 Seu papel é ajudar os usuários a encontrar informações sobre vagas, candidatos, departamentos, métricas de recrutamento e custos.
 
@@ -110,7 +110,7 @@ router.post("/ai/search", async (req, res) => {
 
     const platformData = await gatherPlatformData();
 
-    const contextMessage = `Dados atuais da plataforma TalentOS:\n\n${JSON.stringify(platformData, null, 2)}`;
+    const contextMessage = `Dados atuais da plataforma Talent Cool:\n\n${JSON.stringify(platformData, null, 2)}`;
 
     const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       { role: "system", content: SYSTEM_PROMPT },

@@ -56,13 +56,13 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       } shrink-0`}
     >
       <div className="flex h-16 items-center px-4 border-b border-[hsl(var(--sidebar-border))]">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
-          T
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0">
+          TC
         </div>
         {!collapsed && (
           <div className="ml-3 overflow-hidden">
             <span className="font-display font-bold text-base leading-tight text-foreground block">
-              TalentOS
+              Talent Cool
             </span>
           </div>
         )}
