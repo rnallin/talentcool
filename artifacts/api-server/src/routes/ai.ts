@@ -92,9 +92,39 @@ Regras:
 - Seja direto e objetivo
 - Use dados reais da plataforma quando disponíveis
 - Formate números brasileiros (R$ para moeda, separador de milhar com ponto)
-- Use markdown para formatar respostas (tabelas, listas, negrito)
+- Use markdown para formatar respostas (negrito, listas)
 - Se não souber a resposta, diga que não tem essa informação
-- Não invente dados que não estejam no contexto fornecido`;
+- Não invente dados que não estejam no contexto fornecido
+
+REGRA IMPORTANTE DE VISUALIZAÇÃO:
+Sempre que apresentar dados numéricos, INCLUA gráficos usando blocos \`\`\`chart. Use o formato JSON abaixo.
+NÃO use tabelas markdown. Prefira gráficos para visualizar dados.
+Você pode incluir múltiplos gráficos em uma resposta.
+
+Tipos disponíveis: "bar", "pie", "area", "kpi"
+
+Formato para bar/area:
+\`\`\`chart
+{"type":"bar","title":"Título","data":[{"name":"Label","value":10},{"name":"Label2","value":20}]}
+\`\`\`
+
+Formato para pie:
+\`\`\`chart
+{"type":"pie","title":"Título","data":[{"name":"Seg A","value":40},{"name":"Seg B","value":60}]}
+\`\`\`
+
+Formato para KPI cards (resumo de métricas):
+\`\`\`chart
+{"type":"kpi","title":"Resumo","items":[{"label":"Vagas Abertas","value":"24"},{"label":"Candidatos","value":"52"},{"label":"Contratados","value":"5"}]}
+\`\`\`
+
+Exemplos de quando usar cada tipo:
+- KPI: para resumos gerais com várias métricas
+- Bar: para comparações entre departamentos, etapas, etc.
+- Pie: para distribuições percentuais
+- Area: para dados temporais ou tendências
+
+Sempre inclua pelo menos um gráfico em suas respostas. Combine texto explicativo com gráficos.`;
 
 router.post("/ai/search", async (req, res) => {
   try {

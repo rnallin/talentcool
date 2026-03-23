@@ -1,5 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Send, Bot, User, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import {
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from "recharts";
 
 interface Message {
   id: string;
@@ -8,13 +12,189 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  { text: "Quantas vagas estão abertas?", emoji: "📋" },
-  { text: "Qual departamento tem mais candidatos?", emoji: "👥" },
+  { text: "Quero um relatório com todas as métricas", emoji: "📊" },
+  { text: "Quantas vagas estão abertas por departamento?", emoji: "📋" },
+  { text: "Qual a distribuição de candidatos por etapa?", emoji: "👥" },
   { text: "Qual o custo estimado das vagas abertas?", emoji: "💰" },
-  { text: "Quais candidatos estão na etapa de entrevista?", emoji: "🎯" },
-  { text: "Resumo geral do recrutamento", emoji: "📊" },
+  { text: "Resumo geral do recrutamento", emoji: "🎯" },
   { text: "Qual o tempo médio de contratação?", emoji: "⏱️" },
 ];
+
+const CHART_COLORS = ["#145338", "#2d8a5e", "#4ade80", "#97A09B", "#6A6E6C", "#b8c0bb", "#059669", "#10b981"];
+
+interface ChartBlock {
+  type: "bar" | "pie" | "area" | "kpi";
+  title?: string;
+  data?: Array<{ name: string; value: number }>;
+  items?: Array<{ label: string; value: string }>;
+}
+
+function InlineChart({ chart }: { chart: ChartBlock }) {
+  if (chart.type === "kpi" && chart.items) {
+    return (
+      <div className="my-4">
+        {chart.title && <p className="text-sm font-semibold text-foreground mb-3">{chart.title}</p>}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {chart.items.map((item, i) => (
+            <div key={i} className="bg-background border border-border rounded-xl p-3.5 text-center">
+              <p className="text-2xl font-bold text-foreground">{item.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!chart.data || chart.data.length === 0) return null;
+
+  if (chart.type === "pie") {
+    return (
+      <div className="my-4">
+        {chart.title && <p className="text-sm font-semibold text-foreground mb-3">{chart.title}</p>}
+        <div className="bg-background border border-border rounded-xl p-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <ResponsiveContainer width="100%" height={200} minWidth={180}>
+              <PieChart>
+                <Pie
+                  data={chart.data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {chart.data.map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.75rem",
+                    fontSize: "0.8rem",
+                    backdropFilter: "blur(8px)",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 justify-center sm:flex-col sm:justify-start">
+              {chart.data.map((d, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  <span className="text-muted-foreground">{d.name}</span>
+                  <span className="font-semibold text-foreground">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (chart.type === "area") {
+    return (
+      <div className="my-4">
+        {chart.title && <p className="text-sm font-semibold text-foreground mb-3">{chart.title}</p>}
+        <div className="bg-background border border-border rounded-xl p-4">
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={chart.data}>
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#145338" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#145338" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <Tooltip
+                contentStyle={{
+                  background: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "0.75rem",
+                  fontSize: "0.8rem",
+                }}
+              />
+              <Area type="monotone" dataKey="value" stroke="#145338" strokeWidth={2} fill="url(#areaGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-4">
+      {chart.title && <p className="text-sm font-semibold text-foreground mb-3">{chart.title}</p>}
+      <div className="bg-background border border-border rounded-xl p-4">
+        <ResponsiveContainer width="100%" height={Math.max(200, chart.data.length * 40)}>
+          <BarChart data={chart.data} layout="vertical" margin={{ left: 10, right: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={100} />
+            <Tooltip
+              contentStyle={{
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "0.75rem",
+                fontSize: "0.8rem",
+              }}
+            />
+            <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
+              {chart.data.map((_, i) => (
+                <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function parseAndRender(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  const chartRegex = /```chart\s*\n([\s\S]*?)```/g;
+
+  let lastIndex = 0;
+  let match;
+
+  while ((match = chartRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const textBefore = text.slice(lastIndex, match.index);
+      parts.push(
+        <div key={`t-${lastIndex}`} className="prose prose-sm max-w-none [&_strong]:font-semibold [&_code]:text-xs" dangerouslySetInnerHTML={{ __html: parseMarkdown(textBefore) }} />
+      );
+    }
+
+    try {
+      const chartData: ChartBlock = JSON.parse(match[1].trim());
+      parts.push(<InlineChart key={`c-${match.index}`} chart={chartData} />);
+    } catch {
+      parts.push(
+        <div key={`e-${match.index}`} className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: parseMarkdown(match[0]) }} />
+      );
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    const remaining = text.slice(lastIndex);
+    if (remaining.trim()) {
+      parts.push(
+        <div key={`t-${lastIndex}`} className="prose prose-sm max-w-none [&_strong]:font-semibold [&_code]:text-xs" dangerouslySetInnerHTML={{ __html: parseMarkdown(remaining) }} />
+      );
+    }
+  }
+
+  return parts;
+}
 
 function parseMarkdown(text: string): string {
   let html = text
@@ -251,20 +431,19 @@ export default function Assistant() {
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`rounded-2xl text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-transparent"
+                    ? "max-w-[80%] bg-primary text-primary-foreground rounded-br-md px-4 py-3"
+                    : "flex-1 min-w-0"
                 }`}
               >
                 {msg.role === "assistant" ? (
                   msg.content ? (
-                    <div
-                      className="prose prose-sm max-w-none [&_strong]:font-semibold [&_code]:text-xs"
-                      dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
-                    />
+                    <div className="space-y-0">
+                      {parseAndRender(msg.content)}
+                    </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="flex items-center gap-2 text-muted-foreground py-3">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Analisando seus dados...</span>
                     </div>
