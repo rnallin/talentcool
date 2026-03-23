@@ -22,6 +22,9 @@ import {
   BarChart3,
   ArrowDownRight,
   ArrowUpRight,
+  ChevronDown,
+  Minimize2,
+  Maximize2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -72,7 +75,7 @@ function KpiCard({
   trend?: { value: string; positive: boolean };
 }) {
   return (
-    <Card className="border-border shadow-sm rounded-xl card-hover">
+    <Card className="border-border rounded-xl kpi-card cursor-default">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div>
@@ -88,7 +91,7 @@ function KpiCard({
               <p className="text-xs text-muted-foreground">{sub}</p>
             </div>
           </div>
-          <div className={`p-3 rounded-xl ${iconBg}`}>
+          <div className={`p-3 rounded-xl ${iconBg} transition-transform duration-300`}>
             <Icon className={`h-5 w-5 ${iconColor}`} />
           </div>
         </div>
@@ -255,7 +258,7 @@ function CovSimulator() {
             </div>
           </div>
 
-          <Card className="border-border shadow-sm rounded-xl">
+          <Card className="border-border rounded-xl chart-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Projeção de Prejuízo Acumulado</CardTitle>
               <p className="text-xs text-muted-foreground">Sem plataforma vs. com Talent Cool</p>
@@ -266,13 +269,18 @@ function CovSimulator() {
                   <AreaChart data={projectionData} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
                     <defs>
                       <linearGradient id="gradRose" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#e11d48" stopOpacity={0.15} />
+                        <stop offset="5%" stopColor="#e11d48" stopOpacity={0.25} />
+                        <stop offset="50%" stopColor="#e11d48" stopOpacity={0.08} />
                         <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#145338" stopOpacity={0.15} />
+                        <stop offset="5%" stopColor="#145338" stopOpacity={0.25} />
+                        <stop offset="50%" stopColor="#145338" stopOpacity={0.08} />
                         <stop offset="95%" stopColor="#145338" stopOpacity={0} />
                       </linearGradient>
+                      <filter id="chartShadow" x="-5%" y="-5%" width="110%" height="120%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#145338" floodOpacity="0.1" />
+                      </filter>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis
@@ -377,6 +385,88 @@ function CovSimulator() {
   );
 }
 
+function CollapsibleJobTable({ jobs }: { jobs: Array<{ jobId: number; jobTitle: string; department: string; daysOpen: number; avgSalary: number; dailyCost: number; totalAccruedCost: number }> }) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <Card className="border-border rounded-xl chart-card overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls="job-detail-table"
+        className="w-full p-5 flex items-center justify-between bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border"
+      >
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold text-base font-display text-left">Detalhamento por Vaga</h3>
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+            {jobs.length} {jobs.length === 1 ? "vaga" : "vagas"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground hidden sm:inline">
+            {isOpen ? "Minimizar" : "Expandir"}
+          </span>
+          <div className={`p-1 rounded-md hover:bg-muted transition-all duration-300 ${isOpen ? "" : "rotate-180"}`}>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isOpen ? "rotate-0" : "rotate-180"}`} />
+          </div>
+        </div>
+      </button>
+      <div id="job-detail-table" className={`collapsible-section ${isOpen ? "open" : ""}`}>
+        <div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/40">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="font-semibold text-foreground">Cargo</TableHead>
+                  <TableHead className="font-semibold text-foreground">Departamento</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Dias Aberta</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right">Salário Ref.</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right text-rose-600">Custo Diário</TableHead>
+                  <TableHead className="font-semibold text-foreground text-right text-rose-600">Custo Acumulado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {jobs.map((job, idx) => (
+                  <TableRow key={job.jobId} className="table-row-fluid fade-in-up" style={{ animationDelay: `${idx * 30}ms` }}>
+                    <TableCell className="font-medium">{job.jobTitle}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-muted-foreground text-sm">
+                        <Building2 className="w-3 h-3 mr-1.5" />
+                        {job.department}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`inline-flex px-2 py-1 rounded-md font-medium text-xs transition-colors ${
+                        job.daysOpen > 45
+                          ? "bg-rose-100 text-rose-700"
+                          : job.daysOpen > 30
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-muted text-muted-foreground"
+                      }`}>
+                        {job.daysOpen}d
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatCurrency(job.avgSalary)}</TableCell>
+                    <TableCell className="text-right font-medium text-rose-500">{formatCurrency(job.dailyCost)}</TableCell>
+                    <TableCell className="text-right font-bold text-rose-600">{formatCurrency(job.totalAccruedCost)}</TableCell>
+                  </TableRow>
+                ))}
+                {jobs.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                      Nenhuma vaga aberta no momento. Parabéns!
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function RealCostView() {
   const { data: costData, isLoading } = useGetOpenJobsCost();
 
@@ -470,7 +560,7 @@ function RealCostView() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-border shadow-sm rounded-xl">
+        <Card className="border-border rounded-xl chart-card">
           <CardHeader>
             <CardTitle className="text-base">Custo por Vaga</CardTitle>
             <p className="text-xs text-muted-foreground">Composição de custos por posição</p>
@@ -520,7 +610,7 @@ function RealCostView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm rounded-xl">
+        <Card className="border-border rounded-xl chart-card">
           <CardHeader>
             <CardTitle className="text-base">Distribuição de Custos</CardTitle>
             <p className="text-xs text-muted-foreground">Por categoria</p>
@@ -573,59 +663,7 @@ function RealCostView() {
         </div>
       </div>
 
-      <Card className="border-border shadow-sm rounded-xl overflow-hidden">
-        <div className="p-5 border-b border-border bg-muted/30">
-          <h3 className="font-semibold text-base font-display">Detalhamento por Vaga</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/40">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="font-semibold text-foreground">Cargo</TableHead>
-                <TableHead className="font-semibold text-foreground">Departamento</TableHead>
-                <TableHead className="font-semibold text-foreground text-center">Dias Aberta</TableHead>
-                <TableHead className="font-semibold text-foreground text-right">Salário Ref.</TableHead>
-                <TableHead className="font-semibold text-foreground text-right text-rose-600">Custo Diário</TableHead>
-                <TableHead className="font-semibold text-foreground text-right text-rose-600">Custo Acumulado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {costData.jobs.map((job) => (
-                <TableRow key={job.jobId} className="hover:bg-muted/40 transition-colors">
-                  <TableCell className="font-medium">{job.jobTitle}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-muted-foreground text-sm">
-                      <Building2 className="w-3 h-3 mr-1.5" />
-                      {job.department}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span className={`inline-flex px-2 py-1 rounded-md font-medium text-xs ${
-                      job.daysOpen > 45
-                        ? "bg-rose-100 text-rose-700"
-                        : job.daysOpen > 30
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-muted text-muted-foreground"
-                    }`}>
-                      {job.daysOpen}d
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{formatCurrency(job.avgSalary)}</TableCell>
-                  <TableCell className="text-right font-medium text-rose-500">{formatCurrency(job.dailyCost)}</TableCell>
-                  <TableCell className="text-right font-bold text-rose-600">{formatCurrency(job.totalAccruedCost)}</TableCell>
-                </TableRow>
-              ))}
-              {costData.jobs.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                    Nenhuma vaga aberta no momento. Parabéns!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+      <CollapsibleJobTable jobs={costData.jobs} />
     </div>
   );
 }
@@ -641,12 +679,12 @@ export default function Costs() {
       </div>
 
       <Tabs defaultValue="real" className="w-full">
-        <TabsList className="bg-muted/60 p-1 rounded-lg">
-          <TabsTrigger value="real" className="rounded-md text-sm px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+        <TabsList className="bg-muted/60 p-1 rounded-xl">
+          <TabsTrigger value="real" className="rounded-lg text-sm px-5 py-2 transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:shadow-primary/5">
             <DollarSign className="w-4 h-4 mr-1.5" />
             Vagas Abertas
           </TabsTrigger>
-          <TabsTrigger value="simulator" className="rounded-md text-sm px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="simulator" className="rounded-lg text-sm px-5 py-2 transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:shadow-primary/5">
             <Calculator className="w-4 h-4 mr-1.5" />
             Simulador CoV
           </TabsTrigger>

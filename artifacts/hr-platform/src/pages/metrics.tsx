@@ -318,7 +318,7 @@ export default function Metrics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Time to Hire */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Time-to-Hire por Departamento (Dias)</CardTitle>
           </CardHeader>
@@ -344,7 +344,7 @@ export default function Metrics() {
         </Card>
 
         {/* Funnel */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Funil de Conversão Global</CardTitle>
             <p className="text-xs text-muted-foreground">Clique em uma etapa para ver detalhes</p>
@@ -361,7 +361,7 @@ export default function Metrics() {
         </Card>
 
         {/* Hires Over Time */}
-        <Card className="col-span-1 lg:col-span-2 shadow-sm border-border rounded-xl">
+        <Card className="col-span-1 lg:col-span-2 chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Volume de Vagas vs. Contratações (12 meses)</CardTitle>
           </CardHeader>
@@ -382,7 +382,7 @@ export default function Metrics() {
         </Card>
 
         {/* Custo por Contratação — Tendência */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Custo por Contratação — Tendência</CardTitle>
             <p className="text-xs text-muted-foreground">Custo médio em reais por hire</p>
@@ -418,7 +418,7 @@ export default function Metrics() {
         </Card>
 
         {/* Contratações por Departamento */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Contratações por Departamento</CardTitle>
             <p className="text-xs text-muted-foreground">Vagas abertas vs. contratados</p>
@@ -456,7 +456,7 @@ export default function Metrics() {
         </Card>
 
         {/* Source of Hire */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Source of Hire</CardTitle>
             <p className="text-xs text-muted-foreground">Por canal de recrutamento</p>
@@ -493,7 +493,7 @@ export default function Metrics() {
         </Card>
 
         {/* Scorecard RH */}
-        <Card className="shadow-sm border-border rounded-xl">
+        <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">Scorecard RH</CardTitle>
             <p className="text-xs text-muted-foreground">Desempenho geral do time</p>
@@ -528,7 +528,7 @@ export default function Metrics() {
         </Card>
 
         {/* Performance por Recrutador */}
-        <Card className="col-span-1 lg:col-span-2 shadow-sm border-border rounded-xl">
+        <Card className="col-span-1 lg:col-span-2 chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#145338]" />

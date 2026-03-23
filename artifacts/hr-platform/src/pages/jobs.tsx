@@ -105,7 +105,7 @@ export default function Jobs() {
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25 rounded-xl px-6 h-11 transition-all hover:-translate-y-0.5">
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-11 btn-fluid">
               <Plus className="mr-2 h-5 w-5" />
               Nova Vaga
             </Button>
@@ -269,9 +269,9 @@ export default function Jobs() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredJobs?.map(job => (
+          {filteredJobs?.map((job, idx) => (
             <Link key={job.id} href={`/vagas/${job.id}`}>
-              <Card className="card-hover h-full flex flex-col cursor-pointer border-border/60 rounded-2xl group">
+              <Card className="card-hover h-full flex flex-col cursor-pointer border-border/60 rounded-2xl group fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
                 <CardHeader className="pb-3 relative">
                   <div className="flex justify-between items-start mb-2">
                     <Badge variant="outline" className={`font-medium capitalize ${getStatusColor(job.status)}`}>

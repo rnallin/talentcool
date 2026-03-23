@@ -31,15 +31,17 @@ function KpiCard({
   badge,
   badgePositive,
   icon: Icon,
+  className: cn = "",
 }: {
   value: string;
   label: string;
   badge?: string;
   badgePositive?: boolean;
   icon: LucideIcon;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-4 p-5 bg-card rounded-2xl border border-border">
+    <div className={`kpi-card flex items-center gap-4 p-5 bg-card rounded-2xl border border-border cursor-default ${cn}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3">
           <span className="text-3xl font-bold text-foreground tracking-tight">{value}</span>
@@ -58,8 +60,8 @@ function KpiCard({
         </div>
         <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
       </div>
-      <div className="p-2 rounded-full bg-primary/8">
-        <Icon className="w-4 h-4 text-primary" />
+      <div className="p-2.5 rounded-xl bg-primary/8">
+        <Icon className="w-5 h-5 text-primary" />
       </div>
     </div>
   );
@@ -119,6 +121,7 @@ export default function Dashboard() {
           icon={Briefcase}
           badge={`+${Math.max(1, Math.round(metrics.openJobsGrowth ?? 4))}%`}
           badgePositive={true}
+          className="fade-in-up stagger-1"
         />
         <KpiCard
           value={metrics.totalCandidates.toLocaleString("pt-BR")}
@@ -126,6 +129,7 @@ export default function Dashboard() {
           icon={Users}
           badge={`+${Math.max(1, Math.round(metrics.candidatesGrowth ?? 12))}%`}
           badgePositive={true}
+          className="fade-in-up stagger-2"
         />
         <KpiCard
           value={`${metrics.avgTimeToHireDays}`}
@@ -133,6 +137,7 @@ export default function Dashboard() {
           icon={Clock}
           badge="-3 dias"
           badgePositive={true}
+          className="fade-in-up stagger-3"
         />
         <KpiCard
           value={metrics.hiresThisMonth.toString()}
@@ -140,6 +145,7 @@ export default function Dashboard() {
           icon={Activity}
           badge={`${hiresChange >= 0 ? "+" : ""}${hiresChange}`}
           badgePositive={hiresChange >= 0}
+          className="fade-in-up stagger-4"
         />
         <KpiCard
           value={
@@ -151,11 +157,12 @@ export default function Dashboard() {
           icon={DollarSign}
           badge="+8%"
           badgePositive={false}
+          className="fade-in-up stagger-5"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <Card className="lg:col-span-2 rounded-2xl border border-border shadow-none">
+        <Card className="lg:col-span-2 rounded-2xl border border-border chart-card fade-in-up">
           <CardHeader className="pb-0">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold text-foreground">Contratações</CardTitle>
@@ -173,7 +180,8 @@ export default function Dashboard() {
                 >
                   <defs>
                     <linearGradient id="colorHires" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#145338" stopOpacity={0.15} />
+                      <stop offset="5%" stopColor="#145338" stopOpacity={0.25} />
+                      <stop offset="50%" stopColor="#145338" stopOpacity={0.08} />
                       <stop offset="95%" stopColor="#145338" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -214,7 +222,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-border shadow-none">
+        <Card className="rounded-2xl border border-border chart-card fade-in-up">
           <CardHeader className="pb-0">
             <CardTitle className="text-sm font-semibold text-foreground">Vagas por Departamento</CardTitle>
           </CardHeader>
@@ -264,7 +272,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <Card className="rounded-2xl border border-border shadow-none">
+        <Card className="rounded-2xl border border-border chart-card fade-in-up">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-foreground">cNPS do Candidato</CardTitle>
           </CardHeader>
@@ -297,7 +305,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 rounded-2xl border border-border shadow-none">
+        <Card className="lg:col-span-2 rounded-2xl border border-border chart-card fade-in-up">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-foreground">Insights do Mês</CardTitle>
           </CardHeader>
