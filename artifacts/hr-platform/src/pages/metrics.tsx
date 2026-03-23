@@ -132,7 +132,7 @@ function FunnelViz({ stages }: { stages: FunnelStage[] }) {
                 </span>
               </div>
 
-              <div className="flex-1 flex justify-center">
+              <div className="flex-1">
                 <div
                   className={`relative h-10 rounded-lg transition-all duration-300 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-[#145338]/20" : ""}`}
                   style={{ width: `${widthPct}%` }}
