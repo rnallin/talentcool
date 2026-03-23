@@ -374,8 +374,13 @@ export default function Metrics() {
         {/* Funnel */}
         <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Funil de Conversão Global</CardTitle>
-            <p className="text-xs text-muted-foreground">Clique em uma etapa para ver detalhes</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Funil de Conversão Global</CardTitle>
+                <p className="text-xs text-muted-foreground">Clique em uma etapa para ver detalhes</p>
+              </div>
+              <ExpandButton onClick={() => setExpandedChart("funnel")} />
+            </div>
           </CardHeader>
           <CardContent className="pt-2 pb-4">
             {funnelData.length > 0 ? (
@@ -814,6 +819,43 @@ export default function Metrics() {
             <Radar name="Score" dataKey="score" stroke="#145338" fill="#145338" fillOpacity={0.3} strokeWidth={2.5} />
           </RadarChart>
         </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "funnel"}
+        onClose={() => setExpandedChart(null)}
+        title="Funil de Conversão Global"
+        subtitle="Volume e taxa de conversão em cada etapa do processo seletivo"
+        details={
+          funnelData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Detalhamento por Etapa</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {funnelData.map((stage, i) => (
+                  <div key={stage.stage} className="bg-muted/50 rounded-xl p-4">
+                    <p className="text-xs text-muted-foreground mb-1">{stage.stage}</p>
+                    <p className="text-2xl font-bold text-foreground">{stage.count}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-medium text-foreground">{stage.conversionRate}%</span>
+                      <span className="text-xs text-muted-foreground">do total</span>
+                    </div>
+                    {i > 0 && (
+                      <p className="text-xs text-rose-500 mt-1">
+                        -{Math.round(100 - (stage.count / funnelData[i - 1].count) * 100)}% da etapa anterior
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <div className="h-full flex items-center justify-center">
+          <div className="w-full max-w-2xl">
+            <FunnelViz stages={funnelData} />
+          </div>
+        </div>
       </ChartModal>
     </div>
   );
