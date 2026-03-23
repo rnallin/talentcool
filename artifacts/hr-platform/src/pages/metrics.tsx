@@ -270,22 +270,45 @@ export default function Metrics() {
 
   const maxFechadas = Math.max(...STATIC_RECRUITERS.map((r) => r.fechadas), 1);
 
+  const totalCandidates = overview?.totalCandidates ?? 0;
+  const hiredCount = funnelData.length > 0
+    ? (funnel?.find((s) => s.stage === "contratado")?.count ?? 0)
+    : 0;
+  const interviewCount = funnelData.length > 0
+    ? (funnel?.find((s) => s.stage === "entrevista")?.count ?? 0)
+    : 0;
+
+  const tempoScore = overview
+    ? Math.max(0, Math.min(100, Math.round((60 - overview.avgTimeToHireDays) / 60 * 100)))
+    : 0;
+
+  const offerRate = totalCandidates > 0
+    ? Math.max(0, Math.min(100, Math.round((hiredCount / totalCandidates) * 100 * 5)))
+    : 0;
+
+  const retentionScore = hiredCount > 0
+    ? Math.max(0, Math.min(100, Math.round(75 + (hiredCount / Math.max(totalCandidates, 1)) * 100)))
+    : 0;
+
+  const satisfactionScore = overview
+    ? Math.max(0, Math.min(100, Math.round((overview.candidateNps + 100) / 2)))
+    : 0;
+
+  const qualityScore = interviewCount > 0 && hiredCount > 0
+    ? Math.max(0, Math.min(100, Math.round((hiredCount / interviewCount) * 100 * 2)))
+    : 0;
+
+  const costScore = overview
+    ? Math.max(0, Math.min(100, Math.round((1 - overview.costPerHire / 30000) * 100)))
+    : 0;
+
   const scorecardData = [
-    {
-      subject: "Tempo p/ Contratar",
-      score: overview ? Math.max(0, Math.min(100, Math.round((90 - overview.avgTimeToHireDays) / 90 * 100))) : 72,
-    },
-    { subject: "Taxa de Oferta", score: 70 },
-    { subject: "Retenção 6m", score: 82 },
-    {
-      subject: "Satisfação",
-      score: overview ? Math.max(0, Math.min(100, Math.round((overview.candidateNps + 100) / 2))) : 78,
-    },
-    { subject: "Qualidade Hire", score: 75 },
-    {
-      subject: "Custo p/ Hire",
-      score: overview ? Math.max(0, Math.min(100, Math.round((1 - overview.costPerHire / 30000) * 100))) : 68,
-    },
+    { subject: "Tempo p/ Contratar", score: tempoScore },
+    { subject: "Taxa de Oferta", score: offerRate },
+    { subject: "Retenção 6m", score: retentionScore },
+    { subject: "Satisfação", score: satisfactionScore },
+    { subject: "Qualidade Hire", score: qualityScore },
+    { subject: "Custo p/ Hire", score: costScore },
   ];
 
   if (isLoading) {
