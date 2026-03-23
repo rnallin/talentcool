@@ -383,6 +383,111 @@ router.post("/email/drafts/:id/send", async (req, res) => {
   }
 });
 
+router.post("/email/candidate-notification", async (req, res) => {
+  try {
+    const { candidateEmail, candidateName, jobTitle, fromStage, toStage, toStageLabel, customMessage } = req.body as {
+      candidateEmail: string;
+      candidateName: string;
+      jobTitle: string;
+      fromStage: string;
+      toStage: string;
+      toStageLabel: string;
+      customMessage?: string;
+    };
+
+    if (!candidateEmail || !candidateName || !jobTitle || !toStage) {
+      res.status(400).json({ error: "Campos obrigatórios faltando" });
+      return;
+    }
+
+    const stageMessages: Record<string, { subject: string; heading: string; body: string }> = {
+      entrevista_rh: {
+        subject: `Próxima etapa: Entrevista de RH — ${jobTitle}`,
+        heading: "Você avançou para a Entrevista de RH! 🎉",
+        body: `<p>Parabéns! Seu perfil foi selecionado para a próxima fase do processo seletivo para a vaga de <strong>${jobTitle}</strong>.</p>
+<p>A próxima etapa será uma <strong>entrevista com o time de Recursos Humanos</strong>, onde conheceremos melhor suas experiências, expectativas e alinhamento cultural.</p>
+<p>Em breve entraremos em contato para agendar o melhor horário.</p>`,
+      },
+      entrevista_tecnica: {
+        subject: `Próxima etapa: Entrevista Técnica — ${jobTitle}`,
+        heading: "Você avançou para a Entrevista Técnica! 🚀",
+        body: `<p>Ótimas notícias! Você foi aprovado(a) na entrevista de RH e avançou para a <strong>Entrevista Técnica</strong> da vaga de <strong>${jobTitle}</strong>.</p>
+<p>Nesta etapa, avaliaremos suas habilidades técnicas e conhecimentos específicos da função.</p>
+<p>Nossa equipe entrará em contato com os detalhes e agendamento.</p>`,
+      },
+      proposta: {
+        subject: `Proposta — ${jobTitle}`,
+        heading: "Temos uma proposta para você! 🌟",
+        body: `<p>Temos o prazer de informar que você chegou à fase de <strong>Proposta</strong> do processo seletivo para <strong>${jobTitle}</strong>.</p>
+<p>Isso significa que seu desempenho nas etapas anteriores foi excelente e gostaríamos de formalizar uma oferta.</p>
+<p>Em breve entraremos em contato com os detalhes da proposta.</p>`,
+      },
+      contratado: {
+        subject: `Bem-vindo(a) à equipe! — ${jobTitle}`,
+        heading: "Parabéns, você foi contratado(a)! 🎊",
+        body: `<p>É com grande alegria que confirmamos sua <strong>contratação</strong> para a vaga de <strong>${jobTitle}</strong>!</p>
+<p>Estamos muito felizes em ter você em nosso time. Em breve enviaremos todas as informações sobre o processo de onboarding.</p>
+<p>Bem-vindo(a) à equipe!</p>`,
+      },
+      reprovado: {
+        subject: `Atualização do processo seletivo — ${jobTitle}`,
+        heading: "Atualização sobre sua candidatura",
+        body: `<p>Agradecemos seu interesse e participação no processo seletivo para a vaga de <strong>${jobTitle}</strong>.</p>
+<p>Após análise cuidadosa, decidimos seguir com outros perfis para esta posição neste momento.</p>
+<p>Seu currículo ficará em nosso banco de talentos e poderemos entrar em contato para futuras oportunidades que se alinhem com seu perfil.</p>
+<p>Desejamos sucesso em sua jornada profissional!</p>`,
+      },
+    };
+
+    const template = stageMessages[toStage] || {
+      subject: `Atualização do processo seletivo — ${jobTitle}`,
+      heading: `Atualização: ${toStageLabel}`,
+      body: `<p>Gostaríamos de informar que houve uma atualização em seu processo seletivo para a vaga de <strong>${jobTitle}</strong>.</p>
+<p>Sua candidatura avançou para a etapa: <strong>${toStageLabel}</strong>.</p>
+<p>Em breve entraremos em contato com mais detalhes.</p>`,
+    };
+
+    const messageContent = customMessage
+      ? `<p>${customMessage}</p>`
+      : template.body;
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"/></head>
+<body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f9fafb;margin:0;padding:0;">
+<div style="max-width:640px;margin:0 auto;background:#fff;">
+  <div style="background:#145338;padding:32px 24px;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool</h1>
+    <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:14px;">Processo Seletivo</p>
+  </div>
+  <div style="padding:32px 24px;">
+    <p style="font-size:16px;color:#333;margin:0 0 8px;">Olá, <strong>${candidateName}</strong>!</p>
+    <h2 style="color:#145338;font-size:20px;margin:16px 0;">${template.heading}</h2>
+    <div style="font-size:14px;line-height:1.7;color:#333;">${messageContent}</div>
+    <div style="margin-top:24px;padding:16px;background:#f0fdf4;border-radius:8px;border-left:4px solid #145338;">
+      <p style="margin:0;font-size:13px;color:#6A6E6C;"><strong>Vaga:</strong> ${jobTitle}</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#6A6E6C;"><strong>Etapa atual:</strong> ${toStageLabel}</p>
+    </div>
+  </div>
+  <div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">
+    Enviado pela plataforma Talent Cool
+  </div>
+</div></body></html>`;
+
+    const { client, fromEmail } = await getResendClient();
+    await client.emails.send({
+      from: fromEmail || "Talent Cool <onboarding@resend.dev>",
+      to: [candidateEmail],
+      subject: customMessage ? `Atualização: ${toStageLabel} — ${jobTitle}` : template.subject,
+      html,
+    });
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Candidate notification error:", error);
+    res.status(500).json({ error: error.message || "Erro ao enviar notificação" });
+  }
+});
+
 function wrapCustomHtml(content: string) {
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>

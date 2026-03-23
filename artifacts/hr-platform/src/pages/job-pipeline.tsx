@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getInitials } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Plus, Mail, Phone, Calendar, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, Plus, Mail, Phone, Calendar, MoreHorizontal, Send, Loader2, X } from "lucide-react";
 import { Link } from "wouter";
 import {
   Dialog,
@@ -138,10 +138,24 @@ function CandidateCard({ candidate, index }: { candidate: Candidate; index: numb
   );
 }
 
+interface PendingNotification {
+  candidateId: number;
+  candidateName: string;
+  candidateEmail: string;
+  jobTitle: string;
+  fromStage: string;
+  toStage: string;
+  toStageLabel: string;
+}
+
 export default function JobPipeline() {
   const [, params] = useRoute("/vagas/:id");
   const jobId = parseInt(params?.id || "0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingNotification, setPendingNotification] = useState<PendingNotification | null>(null);
+  const [notificationSending, setNotificationSending] = useState(false);
+  const [customMessage, setCustomMessage] = useState("");
+  const baseUrl = import.meta.env.BASE_URL || "/";
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -195,6 +209,34 @@ export default function JobPipeline() {
     return cols;
   }, [job?.candidates, stages]);
 
+  async function sendCandidateNotification() {
+    if (!pendingNotification) return;
+    setNotificationSending(true);
+    try {
+      const apiUrl = `${baseUrl}api/email/candidate-notification`.replace(/\/\//g, "/");
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...pendingNotification,
+          customMessage: customMessage.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "E-mail enviado ao candidato!" });
+      } else {
+        toast({ title: "Erro ao enviar e-mail", description: data.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao enviar e-mail", variant: "destructive" });
+    } finally {
+      setNotificationSending(false);
+      setPendingNotification(null);
+      setCustomMessage("");
+    }
+  }
+
   const onDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
@@ -206,6 +248,10 @@ export default function JobPipeline() {
 
     const candidateId = parseInt(draggableId);
     const newStage = destination.droppableId;
+    const oldStage = source.droppableId;
+
+    const candidate = job?.candidates?.find((c) => c.id === candidateId);
+    const targetStage = stages.find((s) => s.name === newStage);
 
     queryClient.setQueryData<JobDetail>([`/api/jobs/${jobId}`], (oldData) => {
       if (!oldData) return oldData;
@@ -220,6 +266,19 @@ export default function JobPipeline() {
     updateCandidateMutation.mutate(
       { id: candidateId, data: { stage: newStage } },
       {
+        onSuccess: () => {
+          if (candidate?.email && job?.title && targetStage) {
+            setPendingNotification({
+              candidateId,
+              candidateName: candidate.name,
+              candidateEmail: candidate.email,
+              jobTitle: job.title,
+              fromStage: oldStage,
+              toStage: newStage,
+              toStageLabel: targetStage.label,
+            });
+          }
+        },
         onError: () => {
           queryClient.invalidateQueries({ queryKey: [`/api/jobs/${jobId}`] });
           toast({ title: "Erro ao mover candidato", variant: "destructive" });
@@ -466,6 +525,59 @@ export default function JobPipeline() {
           </div>
         </DragDropContext>
       </div>
+
+      <Dialog open={!!pendingNotification} onOpenChange={(open) => { if (!open) { setPendingNotification(null); setCustomMessage(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Notificar Candidato?
+            </DialogTitle>
+            <DialogDescription>
+              <strong>{pendingNotification?.candidateName}</strong> avançou para{" "}
+              <strong>{pendingNotification?.toStageLabel}</strong>. Deseja enviar um e-mail de notificação?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg text-sm">
+              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground truncate">{pendingNotification?.candidateEmail}</span>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                Mensagem personalizada (opcional)
+              </label>
+              <Textarea
+                placeholder="Adicione uma mensagem pessoal ou deixe em branco para usar o template padrão..."
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value)}
+                className="resize-none min-h-[80px] text-sm rounded-xl"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => { setPendingNotification(null); setCustomMessage(""); }}
+              disabled={notificationSending}
+              className="text-muted-foreground"
+            >
+              Não Enviar
+            </Button>
+            <Button
+              onClick={sendCandidateNotification}
+              disabled={notificationSending}
+              className="gap-2 bg-primary hover:bg-primary/90"
+            >
+              {notificationSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Enviar E-mail
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
