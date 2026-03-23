@@ -32,7 +32,14 @@ import {
   LayoutGrid,
   Clock,
   GripVertical,
+  BarChart3,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Timer,
 } from "lucide-react";
+import { ChartModal } from "@/components/chart-modal";
 
 interface AllCandidate {
   id: number;
@@ -230,38 +237,8 @@ function PipelineKanbanView({
     }
   };
 
-  const perfSummary = useMemo(() => {
-    let green = 0, yellow = 0, red = 0;
-    filtered.forEach((c) => {
-      if (TERMINAL_STAGES.has(c.stage)) return;
-      const d = getDaysInStage(c.updatedAt);
-      if (d <= 15) green++;
-      else if (d <= 35) yellow++;
-      else red++;
-    });
-    return { green, yellow, red };
-  }, [filtered]);
-
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex items-center gap-4 mb-3 text-xs">
-        <span className="text-muted-foreground font-medium">Performance:</span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-          <span className="text-muted-foreground">0-15d</span>
-          <span className="font-semibold text-foreground">{perfSummary.green}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          <span className="text-muted-foreground">16-35d</span>
-          <span className="font-semibold text-foreground">{perfSummary.yellow}</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-          <span className="text-muted-foreground">36d+</span>
-          <span className="font-semibold text-foreground">{perfSummary.red}</span>
-        </span>
-      </div>
       <div className="overflow-x-auto pb-4 -mx-2 px-2">
         <div className="flex gap-4 min-w-max">
           {stages.map((stage) => {
@@ -407,6 +384,7 @@ export default function Jobs() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
+  const [kpiOpen, setKpiOpen] = useState(false);
 
   const { data: jobs, isLoading: jobsLoading } = useListJobs();
   const { data: departments } = useListDepartments();
@@ -475,6 +453,36 @@ export default function Jobs() {
 
   const totalCandidates = allCandidates?.length ?? 0;
   const totalOpen = jobs?.filter(j => j.status === "open").length ?? 0;
+
+  const kpiData = useMemo(() => {
+    if (!allCandidates || !stages) return null;
+    const active = allCandidates.filter((c) => !TERMINAL_STAGES.has(c.stage));
+    let green = 0, yellow = 0, red = 0;
+    let totalDays = 0;
+    active.forEach((c) => {
+      const d = getDaysInStage(c.updatedAt);
+      totalDays += d;
+      if (d <= 15) green++;
+      else if (d <= 35) yellow++;
+      else red++;
+    });
+    const avgDays = active.length > 0 ? Math.round(totalDays / active.length) : 0;
+
+    const stageBreakdown = stages.map((s) => {
+      const inStage = allCandidates.filter((c) => c.stage === s.name);
+      const activeSt = inStage.filter((c) => !TERMINAL_STAGES.has(c.stage));
+      const avgSt = activeSt.length > 0
+        ? Math.round(activeSt.reduce((sum, c) => sum + getDaysInStage(c.updatedAt), 0) / activeSt.length)
+        : 0;
+      return { name: s.name, label: s.label, count: inStage.length, avgDays: avgSt, isTerminal: TERMINAL_STAGES.has(s.name) };
+    });
+
+    const hired = allCandidates.filter((c) => c.stage === "contratado").length;
+    const rejected = allCandidates.filter((c) => c.stage === "reprovado").length;
+    const conversionRate = allCandidates.length > 0 ? Math.round((hired / allCandidates.length) * 100) : 0;
+
+    return { green, yellow, red, avgDays, stageBreakdown, hired, rejected, conversionRate, activeCount: active.length };
+  }, [allCandidates, stages]);
 
   const isLoading = viewMode === "kanban" ? candidatesLoading : jobsLoading;
 
@@ -640,6 +648,15 @@ export default function Jobs() {
           </button>
         </div>
 
+        <button
+          onClick={() => setKpiOpen(true)}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shrink-0"
+          title="KPIs do Pipeline"
+        >
+          <BarChart3 className="w-4 h-4" />
+          KPIs
+        </button>
+
         <div className="flex flex-1 gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -706,6 +723,121 @@ export default function Jobs() {
       ) : (
         <CardsView jobs={filteredJobs} />
       )}
+
+      <ChartModal
+        open={kpiOpen}
+        onClose={() => setKpiOpen(false)}
+        title="KPIs do Pipeline"
+        subtitle="Indicadores de performance do funil de recrutamento"
+      >
+        {kpiData && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-card rounded-xl border border-border p-4 text-center">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mx-auto mb-2">
+                  <Users className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{kpiData.activeCount}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Ativos no Pipeline</p>
+              </div>
+              <div className="bg-card rounded-xl border border-border p-4 text-center">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 mx-auto mb-2">
+                  <Timer className="w-5 h-5 text-blue-600" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{kpiData.avgDays}d</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Tempo Médio na Etapa</p>
+              </div>
+              <div className="bg-card rounded-xl border border-border p-4 text-center">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 mx-auto mb-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{kpiData.hired}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Contratados</p>
+              </div>
+              <div className="bg-card rounded-xl border border-border p-4 text-center">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 mx-auto mb-2">
+                  <TrendingUp className="w-5 h-5 text-amber-600" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{kpiData.conversionRate}%</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Taxa de Conversão</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Indicadores de Atenção</h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+                  <div>
+                    <p className="text-lg font-bold text-emerald-800">{kpiData.green}</p>
+                    <p className="text-[11px] text-emerald-600">0 - 15 dias</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                  <div className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
+                  <div>
+                    <p className="text-lg font-bold text-amber-800">{kpiData.yellow}</p>
+                    <p className="text-[11px] text-amber-600">16 - 35 dias</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
+                  <div className="w-3 h-3 rounded-full bg-rose-500 shrink-0" />
+                  <div>
+                    <p className="text-lg font-bold text-rose-800">{kpiData.red}</p>
+                    <p className="text-[11px] text-rose-600">36+ dias</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Candidatos por Etapa</h4>
+              <div className="overflow-hidden rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/50 border-b border-border">
+                      <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">Etapa</th>
+                      <th className="text-center py-2.5 px-4 font-medium text-muted-foreground">Candidatos</th>
+                      <th className="text-center py-2.5 px-4 font-medium text-muted-foreground">Tempo Médio</th>
+                      <th className="text-right py-2.5 px-4 font-medium text-muted-foreground">% do Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kpiData.stageBreakdown.map((s) => {
+                      const style = STAGE_STYLES[s.name] ?? STAGE_STYLES.triagem;
+                      const pct = totalCandidates > 0 ? Math.round((s.count / totalCandidates) * 100) : 0;
+                      return (
+                        <tr key={s.name} className="border-b border-border/50 last:border-0 hover:bg-muted/20">
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2.5 h-2.5 rounded-full ${style.dot}`} />
+                              <span className="font-medium text-foreground">{s.label}</span>
+                            </div>
+                          </td>
+                          <td className="text-center py-2.5 px-4">
+                            <span className={`inline-flex min-w-[28px] justify-center text-xs font-bold px-2 py-0.5 rounded-full ${style.countBg}`}>{s.count}</span>
+                          </td>
+                          <td className="text-center py-2.5 px-4 text-muted-foreground">
+                            {s.isTerminal ? "—" : `${s.avgDays}d`}
+                          </td>
+                          <td className="text-right py-2.5 px-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${style.dot}`} style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </ChartModal>
     </div>
   );
 }
