@@ -196,195 +196,155 @@ export default function JobDescription() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(440px,520px)_1fr] gap-5 flex-1 min-h-0">
-        <div className="flex flex-col min-h-0">
-          <Card className="rounded-2xl border-border/60 shadow-sm flex-1 overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-y-auto p-5 space-y-5">
-              <div>
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Briefcase className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <h3 className="text-sm font-semibold text-foreground">Dados da Vaga</h3>
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 flex-1 min-h-0">
+        <Card className="rounded-2xl border-border/60 shadow-sm p-5 space-y-4 overflow-y-auto">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Briefcase className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <h3 className="text-sm font-semibold text-foreground">Dados da Vaga</h3>
+          </div>
 
-                <div className="space-y-3">
-                  <div className="grid grid-cols-[1fr_140px_140px] gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Titulo do Cargo *</label>
-                      <Input
-                        placeholder="Ex: Desenvolvedor Full Stack Senior"
-                        className="rounded-xl h-9 text-sm"
-                        value={form.title}
-                        onChange={(e) => updateField("title", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Senioridade</label>
-                      <Select value={form.seniority} onValueChange={(v) => updateField("seniority", v)}>
-                        <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="junior">Junior</SelectItem>
-                          <SelectItem value="pleno">Pleno</SelectItem>
-                          <SelectItem value="senior">Senior</SelectItem>
-                          <SelectItem value="especialista">Especialista</SelectItem>
-                          <SelectItem value="gerente">Gerente</SelectItem>
-                          <SelectItem value="diretor">Diretor</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Modalidade</label>
-                      <Select value={form.workMode} onValueChange={(v) => updateField("workMode", v)}>
-                        <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="presencial">Presencial</SelectItem>
-                          <SelectItem value="hibrido">Hibrido</SelectItem>
-                          <SelectItem value="remoto">Remoto</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-[1fr_120px_120px] gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Cargo *</label>
+              <Input placeholder="Ex: Desenvolvedor Full Stack Senior" className="rounded-xl h-9 text-sm" value={form.title} onChange={(e) => updateField("title", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Senioridade</label>
+              <Select value={form.seniority} onValueChange={(v) => updateField("seniority", v)}>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="junior">Junior</SelectItem>
+                  <SelectItem value="pleno">Pleno</SelectItem>
+                  <SelectItem value="senior">Senior</SelectItem>
+                  <SelectItem value="especialista">Especialista</SelectItem>
+                  <SelectItem value="gerente">Gerente</SelectItem>
+                  <SelectItem value="diretor">Diretor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Modalidade</label>
+              <Select value={form.workMode} onValueChange={(v) => updateField("workMode", v)}>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="presencial">Presencial</SelectItem>
+                  <SelectItem value="hibrido">Hibrido</SelectItem>
+                  <SelectItem value="remoto">Remoto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-                  <div className="grid grid-cols-4 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Localização *</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
-                        <Input
-                          placeholder="São Paulo, SP"
-                          className="rounded-xl h-9 pl-7 text-sm"
-                          value={form.location}
-                          onChange={(e) => updateField("location", e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Departamento</label>
-                      <Select value={form.department} onValueChange={(v) => updateField("department", v)}>
-                        <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent>
-                          {departments?.map((d) => (
-                            <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Min</label>
-                      <Input type="number" placeholder="5.000" className="rounded-xl h-9 text-sm" value={form.salaryMin} onChange={(e) => updateField("salaryMin", e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Max</label>
-                      <Input type="number" placeholder="12.000" className="rounded-xl h-9 text-sm" value={form.salaryMax} onChange={(e) => updateField("salaryMax", e.target.value)} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">Tom</h3>
-                <div className="flex gap-1.5">
-                  {toneOptions.map((t) => {
-                    const isActive = form.tone === t.value;
-                    return (
-                      <button
-                        key={t.value}
-                        onClick={() => updateField("tone", t.value)}
-                        className={`group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 cursor-pointer ${
-                          isActive
-                            ? `border-primary/40 ${t.activeBg} shadow-sm`
-                            : "border-border/40 bg-muted/20 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded ${isActive ? t.activeBg : t.bg} flex items-center justify-center shrink-0`}>
-                          <t.icon className={`w-2.5 h-2.5 ${t.color}`} />
-                        </div>
-                        <span className="text-[11px] font-medium">{t.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="w-px h-6 bg-border/50 mx-1" />
-
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">Formato</h3>
-                <div className="flex gap-1.5">
-                  {[
-                    { value: "portal", label: "Portal", Icon: Globe, color: "text-primary/70", bg: "bg-primary/5" },
-                    { value: "linkedin", label: "LinkedIn", Icon: Linkedin, color: "text-blue-600/70", bg: "bg-blue-50" },
-                  ].map((opt) => {
-                    const isActive = form.format === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => updateField("format", opt.value)}
-                        className={`group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 ${
-                          isActive
-                            ? "border-primary/40 bg-primary/5 shadow-sm"
-                            : "border-border/40 bg-muted/20 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded ${opt.bg} flex items-center justify-center shrink-0`}>
-                          <opt.Icon className={`w-2.5 h-2.5 ${opt.color}`} />
-                        </div>
-                        <span className="text-[11px] font-medium">{opt.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Diferenciais da vaga</label>
-                  <Textarea
-                    placeholder="Ex: Bonus agressivo, equipe internacional, stock options..."
-                    className="rounded-xl resize-none min-h-[60px] text-sm"
-                    value={form.differentials}
-                    onChange={(e) => updateField("differentials", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block flex items-center gap-1">
-                    <Tag className="w-3 h-3" /> Palavras-chave SEO
-                  </label>
-                  <Textarea
-                    placeholder="Ex: React, Node.js, AWS, Agile, Scrum..."
-                    className="rounded-xl resize-none min-h-[60px] text-sm"
-                    value={form.keywords}
-                    onChange={(e) => updateField("keywords", e.target.value)}
-                  />
-                </div>
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Localização *</label>
+              <div className="relative">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+                <Input placeholder="São Paulo, SP" className="rounded-xl h-9 pl-7 text-sm" value={form.location} onChange={(e) => updateField("location", e.target.value)} />
               </div>
             </div>
-
-            <div className="p-4 border-t border-border/50 shrink-0 bg-card">
-              {isGenerating ? (
-                <Button
-                  onClick={handleStop}
-                  variant="outline"
-                  className="w-full rounded-xl h-11 text-rose-600 border-rose-200 hover:bg-rose-50 transition-all duration-200"
-                >
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Parar Geração
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleGenerate}
-                  className="group w-full rounded-xl h-11 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  <Sparkles className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                  Gerar Descrição com IA
-                </Button>
-              )}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Departamento</label>
+              <Select value={form.department} onValueChange={(v) => updateField("department", v)}>
+                <SelectTrigger className="rounded-xl h-9 text-sm"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {departments?.map((d) => (
+                    <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </Card>
-        </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Min</label>
+              <Input type="number" placeholder="5.000" className="rounded-xl h-9 text-sm" value={form.salaryMin} onChange={(e) => updateField("salaryMin", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Max</label>
+              <Input type="number" placeholder="12.000" className="rounded-xl h-9 text-sm" value={form.salaryMax} onChange={(e) => updateField("salaryMax", e.target.value)} />
+            </div>
+          </div>
+
+          <div className="h-px bg-border/40" />
+
+          <div className="grid grid-cols-[1fr_auto] gap-6 items-start">
+            <div>
+              <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tom de Voz</h3>
+              <div className="flex gap-1.5">
+                {toneOptions.map((t) => {
+                  const isActive = form.tone === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => updateField("tone", t.value)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 ${
+                        isActive
+                          ? `border-primary/40 ${t.activeBg}`
+                          : "border-border/40 bg-muted/20 hover:bg-muted/50"
+                      }`}
+                    >
+                      <t.icon className={`w-3 h-3 ${t.color} shrink-0`} />
+                      <span className="text-[11px] font-medium whitespace-nowrap">{t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Formato</h3>
+              <div className="flex gap-1.5">
+                {[
+                  { value: "portal", label: "Portal", Icon: Globe, color: "text-primary/70" },
+                  { value: "linkedin", label: "LinkedIn", Icon: Linkedin, color: "text-blue-600/70" },
+                ].map((opt) => {
+                  const isActive = form.format === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateField("format", opt.value)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 ${
+                        isActive
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-border/40 bg-muted/20 hover:bg-muted/50"
+                      }`}
+                    >
+                      <opt.Icon className={`w-3 h-3 ${opt.color} shrink-0`} />
+                      <span className="text-[11px] font-medium whitespace-nowrap">{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-border/40" />
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Diferenciais da vaga</label>
+              <Input placeholder="Bonus, stock options, day-off..." className="rounded-xl h-9 text-sm" value={form.differentials} onChange={(e) => updateField("differentials", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block flex items-center gap-1">
+                <Tag className="w-3 h-3" /> Palavras-chave SEO
+              </label>
+              <Input placeholder="React, Node.js, AWS, Agile..." className="rounded-xl h-9 text-sm" value={form.keywords} onChange={(e) => updateField("keywords", e.target.value)} />
+            </div>
+          </div>
+
+          {isGenerating ? (
+            <Button onClick={handleStop} variant="outline" className="w-full rounded-xl h-11 text-rose-600 border-rose-200 hover:bg-rose-50">
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Parar Geração
+            </Button>
+          ) : (
+            <Button onClick={handleGenerate} className="group w-full rounded-xl h-11 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white shadow-md hover:shadow-lg transition-all duration-300">
+              <Sparkles className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+              Gerar Descrição com IA
+            </Button>
+          )}
+        </Card>
 
         <div ref={outputRef} className="min-h-0">
           {!output && !isGenerating ? (
