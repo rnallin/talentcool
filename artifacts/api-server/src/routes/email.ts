@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { getResendClient } from "../lib/resend";
-import { db, jobsTable, candidatesTable, departmentsTable, companySettingsTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { db, jobsTable, candidatesTable, departmentsTable, companySettingsTable, emailDraftsTable, emailAutomationsTable } from "@workspace/db";
+import { eq, sql, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -293,5 +293,219 @@ router.post("/email/preview", async (req, res) => {
     res.status(500).json({ error: "Erro ao gerar preview" });
   }
 });
+
+router.get("/email/drafts", async (_req, res) => {
+  try {
+    const drafts = await db.select().from(emailDraftsTable).orderBy(desc(emailDraftsTable.updatedAt));
+    res.json(drafts);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/email/drafts", async (req, res) => {
+  try {
+    const { subject, recipients, content, template } = req.body;
+    const [draft] = await db.insert(emailDraftsTable).values({
+      subject: subject || "",
+      recipients: recipients || "",
+      content: content || "",
+      template: template || "custom",
+      status: "draft",
+    }).returning();
+    res.json(draft);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put("/email/drafts/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { subject, recipients, content, template, status } = req.body;
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (subject !== undefined) updates.subject = subject;
+    if (recipients !== undefined) updates.recipients = recipients;
+    if (content !== undefined) updates.content = content;
+    if (template !== undefined) updates.template = template;
+    if (status !== undefined) updates.status = status;
+    if (status === "sent") updates.sentAt = new Date();
+
+    const [draft] = await db.update(emailDraftsTable).set(updates).where(eq(emailDraftsTable.id, id)).returning();
+    res.json(draft);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/email/drafts/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(emailDraftsTable).where(eq(emailDraftsTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/email/drafts/:id/send", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [draft] = await db.select().from(emailDraftsTable).where(eq(emailDraftsTable.id, id));
+    if (!draft) { res.status(404).json({ error: "Rascunho não encontrado" }); return; }
+
+    const recipients = draft.recipients.split(",").map((e) => e.trim()).filter(Boolean);
+    if (recipients.length === 0) { res.status(400).json({ error: "Sem destinatários" }); return; }
+
+    let html: string;
+    if (draft.template === "report") {
+      const data = await getOverviewData();
+      html = buildReportHtml(data);
+    } else if (draft.template === "insights") {
+      const data = await getOverviewData();
+      html = buildInsightsHtml(data);
+    } else {
+      html = wrapCustomHtml(draft.content);
+    }
+
+    const { client, fromEmail } = await getResendClient();
+    await client.emails.send({
+      from: fromEmail || "Talent Cool <onboarding@resend.dev>",
+      to: recipients,
+      subject: draft.subject,
+      html,
+    });
+
+    await db.update(emailDraftsTable).set({ status: "sent", sentAt: new Date(), updatedAt: new Date() }).where(eq(emailDraftsTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+function wrapCustomHtml(content: string) {
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"/></head>
+<body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f9fafb;margin:0;padding:0;">
+<div style="max-width:640px;margin:0 auto;background:#fff;">
+  <div style="background:#145338;padding:32px 24px;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:24px;">Talent Cool</h1>
+  </div>
+  <div style="padding:24px;font-size:14px;line-height:1.7;color:#333;">${content}</div>
+  <div style="background:#f9fafb;padding:16px 24px;text-align:center;font-size:12px;color:#6A6E6C;">
+    Enviado pela plataforma Talent Cool
+  </div>
+</div></body></html>`;
+}
+
+router.get("/email/automations", async (_req, res) => {
+  try {
+    const automations = await db.select().from(emailAutomationsTable).orderBy(desc(emailAutomationsTable.createdAt));
+    res.json(automations);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/email/automations", async (req, res) => {
+  try {
+    const { name, description, template, recipients, frequency, dayOfWeek, hour, minute } = req.body;
+    const nextRunAt = computeNextRun(frequency, dayOfWeek ?? 2, hour ?? 8, minute ?? 0);
+    const [automation] = await db.insert(emailAutomationsTable).values({
+      name,
+      description: description || "",
+      template,
+      recipients: recipients || "",
+      frequency: frequency || "weekly",
+      dayOfWeek: dayOfWeek ?? 2,
+      hour: hour ?? 8,
+      minute: minute ?? 0,
+      isActive: true,
+      nextRunAt,
+    }).returning();
+    res.json(automation);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put("/email/automations/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, description, template, recipients, frequency, dayOfWeek, hour, minute, isActive } = req.body;
+    const updates: Record<string, any> = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (template !== undefined) updates.template = template;
+    if (recipients !== undefined) updates.recipients = recipients;
+    if (frequency !== undefined) updates.frequency = frequency;
+    if (dayOfWeek !== undefined) updates.dayOfWeek = dayOfWeek;
+    if (hour !== undefined) updates.hour = hour;
+    if (minute !== undefined) updates.minute = minute;
+    if (isActive !== undefined) updates.isActive = isActive;
+
+    if (frequency || dayOfWeek !== undefined || hour !== undefined) {
+      const f = frequency || "weekly";
+      const d = dayOfWeek ?? 2;
+      const h = hour ?? 8;
+      const m = minute ?? 0;
+      updates.nextRunAt = computeNextRun(f, d, h, m);
+    }
+
+    const [automation] = await db.update(emailAutomationsTable).set(updates).where(eq(emailAutomationsTable.id, id)).returning();
+    res.json(automation);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/email/automations/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(emailAutomationsTable).where(eq(emailAutomationsTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/email/automations/:id/toggle", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [current] = await db.select().from(emailAutomationsTable).where(eq(emailAutomationsTable.id, id));
+    if (!current) { res.status(404).json({ error: "Automação não encontrada" }); return; }
+    const newActive = !current.isActive;
+    const nextRunAt = newActive ? computeNextRun(current.frequency, current.dayOfWeek, current.hour, current.minute) : null;
+    const [automation] = await db.update(emailAutomationsTable).set({ isActive: newActive, nextRunAt }).where(eq(emailAutomationsTable.id, id)).returning();
+    res.json(automation);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+function computeNextRun(frequency: string, dayOfWeek: number, hour: number, minute: number): Date {
+  const now = new Date();
+  const next = new Date();
+  next.setHours(hour, minute, 0, 0);
+
+  if (frequency === "daily") {
+    if (next <= now) next.setDate(next.getDate() + 1);
+  } else if (frequency === "weekly") {
+    const currentDay = next.getDay();
+    let daysUntil = dayOfWeek - currentDay;
+    if (daysUntil < 0 || (daysUntil === 0 && next <= now)) daysUntil += 7;
+    next.setDate(next.getDate() + daysUntil);
+  } else if (frequency === "biweekly") {
+    const currentDay = next.getDay();
+    let daysUntil = dayOfWeek - currentDay;
+    if (daysUntil < 0 || (daysUntil === 0 && next <= now)) daysUntil += 14;
+    next.setDate(next.getDate() + daysUntil);
+  } else if (frequency === "monthly") {
+    next.setDate(1);
+    if (next <= now) next.setMonth(next.getMonth() + 1);
+  }
+
+  return next;
+}
 
 export default router;

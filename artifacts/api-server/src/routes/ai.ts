@@ -401,4 +401,47 @@ router.post("/ai/market-intelligence", async (req, res) => {
   }
 });
 
+router.post("/ai/email-draft", async (req, res) => {
+  try {
+    const { prompt, context } = req.body as { prompt: string; context?: string };
+    if (!prompt) { res.status(400).json({ error: "Prompt obrigatório" }); return; }
+
+    const openai = await getOpenAI();
+    const platformData = await gatherPlatformData();
+
+    const systemMessage = `Você é um assistente de RH expert em comunicação corporativa em português brasileiro.
+Gere e-mails profissionais, claros e objetivos para o contexto de Recursos Humanos.
+O e-mail deve ser em HTML simples (sem DOCTYPE, sem body — apenas o conteúdo interno).
+Use parágrafos <p>, listas <ul>/<ol>, e <strong> para ênfase.
+Mantenha tom profissional mas acessível.
+
+Dados atuais da empresa para referência:
+- Vagas abertas: ${platformData.summary.openJobs}
+- Total candidatos: ${platformData.summary.totalCandidates}
+- Contratados no mês: ${platformData.summary.hiredThisMonth}
+- Departamentos: ${platformData.summary.totalDepartments}
+${context ? `\nContexto adicional: ${context}` : ""}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: `Gere um e-mail profissional de RH com base nesta solicitação: ${prompt}\n\nRetorne APENAS o conteúdo HTML do corpo do e-mail e uma sugestão de assunto. Formato de resposta:\nASSUNTO: [assunto sugerido]\n---\n[conteúdo HTML do e-mail]` },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const text = completion.choices?.[0]?.message?.content || "";
+    const parts = text.split("---");
+    const subjectLine = (parts[0] || "").replace(/^ASSUNTO:\s*/i, "").trim();
+    const htmlContent = (parts.slice(1).join("---") || parts[0] || "").trim();
+
+    res.json({ subject: subjectLine, content: htmlContent });
+  } catch (error: any) {
+    console.error("AI email draft error:", error);
+    res.status(500).json({ error: "Erro ao gerar e-mail com IA" });
+  }
+});
+
 export default router;

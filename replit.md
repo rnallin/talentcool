@@ -12,6 +12,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `departments`, `jobs`, `candidates`, `benchmarks` — core data
 - `pipeline_stages` — configurable Kanban columns (6 default stages), CRUD via `/api/pipeline/stages`
 - `company_settings` — key/value config (charges_rate, working_days_per_month, company_name), CRUD via `/api/settings`
+- `email_drafts` — saved email drafts (subject, recipients, content, template, status draft/sent, timestamps)
+- `email_automations` — scheduled email automations (name, template, recipients, frequency, dayOfWeek, hour, isActive, nextRunAt)
 
 ### Key Design Decisions
 - Pipeline stages are dynamic (DB-driven), not hardcoded in the frontend
