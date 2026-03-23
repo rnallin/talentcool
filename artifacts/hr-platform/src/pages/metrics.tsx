@@ -132,19 +132,19 @@ function FunnelViz({ stages }: { stages: FunnelStage[] }) {
                 </span>
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 min-w-0 flex items-center gap-2">
                 <div
-                  className={`relative h-10 rounded-lg transition-all duration-300 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-[#145338]/20" : ""}`}
-                  style={{ width: `${widthPct}%` }}
+                  className={`relative h-10 rounded-lg transition-all duration-300 shrink-0 ${FUNNEL_BG[i] ?? FUNNEL_BG[FUNNEL_BG.length - 1]} ${isSelected ? "ring-2 ring-white/40 shadow-lg shadow-[#145338]/20" : ""}`}
+                  style={{ width: `${widthPct}%`, maxWidth: "calc(100% - 50px)" }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-between px-3">
+                  <div className="absolute inset-0 flex items-center px-3 overflow-hidden">
                     <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-white/70" />
+                      <Users className="w-3.5 h-3.5 text-white/70 shrink-0" />
                       <span className="text-white font-bold text-sm">{stage.count}</span>
                     </div>
-                    <span className="text-white/80 text-xs font-medium">{stage.conversionRate}%</span>
                   </div>
                 </div>
+                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap shrink-0">{stage.conversionRate}%</span>
               </div>
 
               <div className="w-6 shrink-0 flex justify-center">
