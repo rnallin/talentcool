@@ -24,6 +24,7 @@ import {
   Cell,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "wouter";
 
 function KpiCard({
   value,
@@ -32,6 +33,7 @@ function KpiCard({
   badgePositive,
   icon: Icon,
   className: cn = "",
+  href,
 }: {
   value: string;
   label: string;
@@ -39,9 +41,10 @@ function KpiCard({
   badgePositive?: boolean;
   icon: LucideIcon;
   className?: string;
+  href?: string;
 }) {
-  return (
-    <div className={`kpi-card flex items-center gap-4 p-5 bg-card rounded-2xl border border-border cursor-default ${cn}`}>
+  const content = (
+    <div className={`kpi-card flex items-center gap-4 p-5 bg-card rounded-2xl border border-border ${href ? "cursor-pointer" : "cursor-default"} ${cn}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3">
           <span className="text-3xl font-bold text-foreground tracking-tight">{value}</span>
@@ -65,6 +68,11 @@ function KpiCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block no-underline">{content}</Link>;
+  }
+  return content;
 }
 
 const DEPT_DATA = [
@@ -122,6 +130,7 @@ export default function Dashboard() {
           badge={`+${Math.max(1, Math.round(metrics.openJobsGrowth ?? 4))}%`}
           badgePositive={true}
           className="fade-in-up stagger-1"
+          href="/vagas"
         />
         <KpiCard
           value={metrics.totalCandidates.toLocaleString("pt-BR")}
@@ -130,6 +139,7 @@ export default function Dashboard() {
           badge={`+${Math.max(1, Math.round(metrics.candidatesGrowth ?? 12))}%`}
           badgePositive={true}
           className="fade-in-up stagger-2"
+          href="/vagas"
         />
         <KpiCard
           value={`${metrics.avgTimeToHireDays}`}
@@ -138,6 +148,7 @@ export default function Dashboard() {
           badge="-3 dias"
           badgePositive={true}
           className="fade-in-up stagger-3"
+          href="/metricas"
         />
         <KpiCard
           value={metrics.hiresThisMonth.toString()}
@@ -146,6 +157,7 @@ export default function Dashboard() {
           badge={`${hiresChange >= 0 ? "+" : ""}${hiresChange}`}
           badgePositive={hiresChange >= 0}
           className="fade-in-up stagger-4"
+          href="/metricas"
         />
         <KpiCard
           value={
@@ -158,6 +170,7 @@ export default function Dashboard() {
           badge="+8%"
           badgePositive={false}
           className="fade-in-up stagger-5"
+          href="/custo"
         />
       </div>
 
