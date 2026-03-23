@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChartModal, ExpandButton } from "@/components/chart-modal";
 import {
   useGetTimeToHireMetrics,
   useGetFunnelMetrics,
@@ -253,6 +254,7 @@ export default function Metrics() {
   const { data: costTrend, isLoading: load4 } = useGetCostPerHireTrend();
   const { data: hiresByDept, isLoading: load5 } = useGetHiresByDepartment();
   const { data: overview } = useGetMetricsOverview();
+  const [expandedChart, setExpandedChart] = useState<string | null>(null);
 
   const isLoading = load1 || load2 || load3 || load4 || load5;
 
@@ -343,7 +345,10 @@ export default function Metrics() {
         {/* Time to Hire */}
         <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
-            <CardTitle className="text-base">Time-to-Hire por Departamento (Dias)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Time-to-Hire por Departamento (Dias)</CardTitle>
+              <ExpandButton onClick={() => setExpandedChart("tth")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full mt-4">
@@ -386,7 +391,10 @@ export default function Metrics() {
         {/* Hires Over Time */}
         <Card className="col-span-1 lg:col-span-2 chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
-            <CardTitle className="text-base">Volume de Vagas vs. Contratações (12 meses)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Volume de Vagas vs. Contratações (12 meses)</CardTitle>
+              <ExpandButton onClick={() => setExpandedChart("hiresTime")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[320px] w-full mt-4">
@@ -407,8 +415,13 @@ export default function Metrics() {
         {/* Custo por Contratação — Tendência */}
         <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
-            <CardTitle className="text-base">Custo por Contratação — Tendência</CardTitle>
-            <p className="text-xs text-muted-foreground">Custo médio em reais por hire</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Custo por Contratação — Tendência</CardTitle>
+                <p className="text-xs text-muted-foreground">Custo médio em reais por hire</p>
+              </div>
+              <ExpandButton onClick={() => setExpandedChart("costTrend")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[280px] w-full mt-2">
@@ -443,8 +456,13 @@ export default function Metrics() {
         {/* Contratações por Departamento */}
         <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
-            <CardTitle className="text-base">Contratações por Departamento</CardTitle>
-            <p className="text-xs text-muted-foreground">Vagas abertas vs. contratados</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Contratações por Departamento</CardTitle>
+                <p className="text-xs text-muted-foreground">Vagas abertas vs. contratados</p>
+              </div>
+              <ExpandButton onClick={() => setExpandedChart("hiresDept")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[280px] w-full mt-2">
@@ -518,8 +536,13 @@ export default function Metrics() {
         {/* Scorecard RH */}
         <Card className="chart-card border-border rounded-xl fade-in-up">
           <CardHeader>
-            <CardTitle className="text-base">Scorecard RH</CardTitle>
-            <p className="text-xs text-muted-foreground">Desempenho geral do time</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Scorecard RH</CardTitle>
+                <p className="text-xs text-muted-foreground">Desempenho geral do time</p>
+              </div>
+              <ExpandButton onClick={() => setExpandedChart("scorecard")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[280px] w-full">
@@ -607,6 +630,191 @@ export default function Metrics() {
           </CardContent>
         </Card>
       </div>
+
+      <ChartModal
+        open={expandedChart === "tth"}
+        onClose={() => setExpandedChart(null)}
+        title="Time-to-Hire por Departamento"
+        subtitle="Tempo médio em dias para preencher uma vaga, por departamento"
+        details={
+          timeToHireData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Detalhamento por Departamento</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {timeToHireData.map((d) => (
+                  <div key={d.department} className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-1">{d.department}</p>
+                    <p className="text-2xl font-bold text-foreground">{d.avgDays}</p>
+                    <p className="text-xs text-muted-foreground">dias</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={timeToHireData} layout="vertical" margin={{ top: 0, right: 40, left: 30, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="hsl(var(--border))" />
+            <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis dataKey="department" type="category" stroke="hsl(var(--foreground))" fontSize={13} fontWeight={500} tickLine={false} axisLine={false} width={120} />
+            <RechartsTooltip content={<CustomTooltip />} />
+            <Bar dataKey="avgDays" name="Dias em Média" fill="#0d9488" radius={[0, 6, 6, 0]} barSize={32}>
+              <LabelList dataKey="avgDays" position="right" fill="hsl(var(--muted-foreground))" fontSize={13} fontWeight={600} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "hiresTime"}
+        onClose={() => setExpandedChart(null)}
+        title="Volume de Vagas vs. Contratações"
+        subtitle="Tendência dos últimos 12 meses"
+        details={
+          hiresData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Dados Mensais</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {hiresData.map((d) => (
+                  <div key={d.month} className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground">{d.month}</p>
+                    <div className="flex items-center justify-center gap-3 mt-1">
+                      <div>
+                        <p className="text-lg font-bold text-foreground">{d.openings}</p>
+                        <p className="text-[10px] text-muted-foreground">vagas</p>
+                      </div>
+                      <div className="w-px h-8 bg-border" />
+                      <div>
+                        <p className="text-lg font-bold text-[#0d9488]">{d.hires}</p>
+                        <p className="text-[10px] text-muted-foreground">hires</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={hiresData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <RechartsTooltip content={<CustomTooltip />} />
+            <Line type="monotone" dataKey="openings" name="Novas Vagas" stroke="#145338" strokeWidth={2.5} dot={{ r: 5, fill: "#145338", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 7 }} />
+            <Line type="monotone" dataKey="hires" name="Contratações" stroke="#0d9488" strokeWidth={2.5} dot={{ r: 5, fill: "#0d9488", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 7 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "costTrend"}
+        onClose={() => setExpandedChart(null)}
+        title="Custo por Contratação — Tendência"
+        subtitle="Evolução do custo médio por hire em R$"
+        details={
+          costTrendData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Valores por Mês</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {costTrendData.map((d) => (
+                  <div key={d.month} className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground">{d.month}</p>
+                    <p className="text-lg font-bold text-foreground">{formatCurrency(d.costPerHire ?? 0)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={costTrendData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={8} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${Math.round(v / 1000)}K`} />
+            <RechartsTooltip content={<CurrencyTooltip />} />
+            <Line type="monotone" dataKey="costPerHire" name="Custo/Hire" stroke="#145338" strokeWidth={2.5} dot={{ r: 5, fill: "#145338", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 7 }} connectNulls />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "hiresDept"}
+        onClose={() => setExpandedChart(null)}
+        title="Contratações por Departamento"
+        subtitle="Vagas abertas vs. contratados por departamento"
+        details={
+          hiresByDeptData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Resumo por Departamento</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {hiresByDeptData.map((d) => (
+                  <div key={d.department} className="bg-muted/50 rounded-lg p-3 flex items-center gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{d.department}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{d.openJobs} vagas abertas · {d.hires} contratados</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-foreground">{d.openJobs > 0 ? Math.round((d.hires / d.openJobs) * 100) : 0}%</p>
+                      <p className="text-[10px] text-muted-foreground">conversão</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={hiresByDeptData} margin={{ top: 5, right: 20, left: 0, bottom: 50 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis dataKey="department" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} angle={-35} textAnchor="end" interval={0} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <RechartsTooltip content={<CustomTooltip />} />
+            <Legend verticalAlign="top" align="right" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "12px", paddingBottom: "8px" }} />
+            <Bar dataKey="openJobs" name="Vagas Abertas" fill="#6A6E6C" radius={[4, 4, 0, 0]} barSize={24} />
+            <Bar dataKey="hires" name="Contratados" fill="#145338" radius={[4, 4, 0, 0]} barSize={24} />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "scorecard"}
+        onClose={() => setExpandedChart(null)}
+        title="Scorecard RH"
+        subtitle="Desempenho geral do time de recrutamento"
+        details={
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Pontuações</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {scorecardData.map((d) => (
+                <div key={d.subject} className="bg-muted/50 rounded-xl p-4">
+                  <p className="text-xs text-muted-foreground mb-1">{d.subject}</p>
+                  <p className="text-3xl font-bold text-foreground">{d.score}</p>
+                  <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${d.score >= 70 ? "bg-emerald-500" : d.score >= 50 ? "bg-amber-500" : "bg-rose-500"}`}
+                      style={{ width: `${d.score}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart data={scorecardData}>
+            <PolarGrid stroke="hsl(var(--border))" />
+            <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fill: "hsl(var(--muted-foreground))" }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickCount={5} />
+            <Radar name="Score" dataKey="score" stroke="#145338" fill="#145338" fillOpacity={0.3} strokeWidth={2.5} />
+          </RadarChart>
+        </ResponsiveContainer>
+      </ChartModal>
     </div>
   );
 }

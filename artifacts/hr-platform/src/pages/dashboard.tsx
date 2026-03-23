@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useGetMetricsOverview, useGetHiresOverTime, useGetOpenJobsCost } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formatters";
@@ -22,9 +23,11 @@ import {
   PieChart,
   Pie,
   Cell,
+  CartesianGrid,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
+import { ChartModal, ExpandButton } from "@/components/chart-modal";
 
 function KpiCard({
   value,
@@ -90,6 +93,7 @@ export default function Dashboard() {
   const { data: metrics, isLoading: loadingMetrics } = useGetMetricsOverview();
   const { data: hiresData, isLoading: loadingHires } = useGetHiresOverTime();
   const { data: costData, isLoading: loadingCost } = useGetOpenJobsCost();
+  const [expandedChart, setExpandedChart] = useState<string | null>(null);
 
   const isLoading = loadingMetrics || loadingHires || loadingCost;
 
@@ -179,8 +183,9 @@ export default function Dashboard() {
           <CardHeader className="pb-0">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold text-foreground">Contratações</CardTitle>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary" /> Contratações</span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Contratações</span>
+                <ExpandButton onClick={() => setExpandedChart("hires")} />
               </div>
             </div>
           </CardHeader>
@@ -237,7 +242,10 @@ export default function Dashboard() {
 
         <Card className="rounded-2xl border border-border chart-card fade-in-up">
           <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-semibold text-foreground">Vagas por Departamento</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-foreground">Vagas por Departamento</CardTitle>
+              <ExpandButton onClick={() => setExpandedChart("dept")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[160px] w-full">
@@ -334,6 +342,96 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <ChartModal
+        open={expandedChart === "hires"}
+        onClose={() => setExpandedChart(null)}
+        title="Contratações"
+        subtitle="Volume de contratações ao longo dos últimos 12 meses"
+        details={
+          hiresData && hiresData.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Dados por Mês</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {hiresData.map((d) => (
+                  <div key={d.month} className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-muted-foreground">{d.month}</p>
+                    <p className="text-lg font-bold text-foreground">{d.hires}</p>
+                    <p className="text-xs text-muted-foreground">{d.openings} vagas abertas</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={hiresData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorHiresModal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#145338" stopOpacity={0.25} />
+                <stop offset="50%" stopColor="#145338" stopOpacity={0.08} />
+                <stop offset="95%" stopColor="#145338" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" stroke="#97A09B" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+            <YAxis stroke="#97A09B" fontSize={12} tickLine={false} axisLine={false} />
+            <Tooltip
+              contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", boxShadow: "0 4px 12px rgba(0,0,0,0.06)", fontSize: "13px" }}
+            />
+            <Area type="monotone" dataKey="hires" name="Contratações" stroke="#145338" strokeWidth={2.5} fillOpacity={1} fill="url(#colorHiresModal)" />
+            <Area type="monotone" dataKey="openings" name="Vagas Abertas" stroke="#2d8a5e" strokeWidth={1.5} fillOpacity={0} strokeDasharray="5 5" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartModal>
+
+      <ChartModal
+        open={expandedChart === "dept"}
+        onClose={() => setExpandedChart(null)}
+        title="Vagas por Departamento"
+        subtitle="Distribuição percentual das vagas abertas"
+        details={
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Detalhamento</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {DEPT_DATA.map((d) => (
+                <div key={d.name} className="flex items-center gap-3 bg-muted/50 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: d.color }}>
+                    {d.value}%
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{d.name}</p>
+                    <p className="text-xs text-muted-foreground">{Math.round(d.value * 0.24)} vagas estimadas</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={DEPT_DATA}
+              innerRadius={100}
+              outerRadius={160}
+              paddingAngle={3}
+              dataKey="value"
+              strokeWidth={0}
+              label={({ name, value }) => `${name}: ${value}%`}
+            >
+              {DEPT_DATA.map((entry, idx) => (
+                <Cell key={idx} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value: number) => [`${value}%`, '']}
+              contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", fontSize: "13px" }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartModal>
     </div>
   );
 }
