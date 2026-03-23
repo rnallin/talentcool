@@ -317,4 +317,88 @@ router.post("/ai/job-description", async (req, res) => {
   }
 });
 
+const MARKET_INTEL_SYSTEM_PROMPT = `Você é um analista de Inteligência de Mercado especializado em RH, Gestão de Pessoas e Talent Acquisition no Brasil.
+
+Sua missão é gerar conteúdo relevante, atual e acionável para profissionais de RH que querem se manter atualizados sobre tendências, legislação, tecnologia e melhores práticas do setor.
+
+Regras:
+- Responda SEMPRE em português brasileiro (pt-BR)
+- Use dados e tendências reais do mercado de trabalho brasileiro
+- Cite fontes quando possível (GPTW, ABRH, LinkedIn Talent Solutions, Glassdoor, etc.)
+- Seja específico para o setor/área solicitado
+- Use markdown para formatar (## para seções, - para listas, **negrito** para destaques)
+- Mantenha tom profissional mas acessível e humanizado
+
+Você DEVE retornar o conteúdo no seguinte formato JSON (sem markdown code blocks ao redor):
+{
+  "insights": [
+    {
+      "id": "unique-id",
+      "category": "tendencia|legislacao|tecnologia|gestao|mercado",
+      "title": "Título curto e impactante",
+      "summary": "Resumo de 2-3 frases do insight",
+      "content": "Conteúdo completo em markdown com detalhes, dados e recomendações práticas (3-5 parágrafos)",
+      "relevance": "alta|media",
+      "actionItems": ["Ação prática 1", "Ação prática 2"],
+      "tags": ["tag1", "tag2"]
+    }
+  ],
+  "articles": [
+    {
+      "id": "unique-id",
+      "title": "Título do artigo recomendado",
+      "source": "Nome da fonte (ex: Harvard Business Review, Exame, Você RH)",
+      "summary": "Resumo de por que este artigo é relevante",
+      "url": "#",
+      "readTime": "5 min"
+    }
+  ],
+  "weeklyDigest": "Um parágrafo com o resumo semanal do que está acontecendo no mercado de RH/Trabalho no Brasil"
+}
+
+Gere 4-6 insights variados e 3-4 artigos recomendados. Sempre inclua insights sobre tendências atuais de 2025-2026.`;
+
+router.post("/ai/market-intelligence", async (req, res) => {
+  try {
+    const { sector, area, topics } = req.body as {
+      sector?: string;
+      area?: string;
+      topics?: string[];
+    };
+
+    let userPrompt = "Gere conteúdo de inteligência de mercado atualizado para um profissional de RH brasileiro.\n\n";
+
+    if (sector) userPrompt += `**Setor da empresa:** ${sector}\n`;
+    if (area) userPrompt += `**Área de atuação:** ${area}\n`;
+    if (topics && topics.length > 0) userPrompt += `**Tópicos de interesse:** ${topics.join(", ")}\n`;
+
+    userPrompt += `\n**Data atual:** ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}\n`;
+    userPrompt += `\nGere os insights e artigos no formato JSON especificado.`;
+
+    const openai = await getOpenAI();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_completion_tokens: 4096,
+      messages: [
+        { role: "system", content: MARKET_INTEL_SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const content = completion.choices[0]?.message?.content ?? "{}";
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      parsed = { insights: [], articles: [], weeklyDigest: "" };
+    }
+
+    res.json(parsed);
+  } catch (error: any) {
+    console.error("Market intelligence AI error:", error);
+    res.status(500).json({ error: "Erro ao gerar inteligência de mercado" });
+  }
+});
+
 export default router;

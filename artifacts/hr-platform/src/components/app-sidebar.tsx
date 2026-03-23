@@ -11,6 +11,7 @@ import {
   Sparkles,
   Mail,
   FileText,
+  Globe2,
   ChevronsLeft,
   ChevronsRight,
   Zap,
@@ -24,6 +25,7 @@ const mainItems = [
 ];
 
 const toolItems = [
+  { title: "Inteligência de Mercado", url: "/inteligencia", icon: Globe2 },
   { title: "Descrição de Vagas", url: "/descricao-vaga", icon: FileText },
   { title: "Custo de Vagas", url: "/custo", icon: Calculator },
   { title: "Benchmarking", url: "/benchmarking", icon: LineChart },
