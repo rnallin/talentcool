@@ -27,7 +27,8 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={Assistant} />
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/vagas" component={Jobs} />
         <Route path="/vagas/:id" component={JobPipeline} />
         <Route path="/custo" component={Costs} />

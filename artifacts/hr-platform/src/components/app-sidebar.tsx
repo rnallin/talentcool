@@ -14,8 +14,9 @@ import {
   ChevronsRight,
 } from "lucide-react";
 
-const generalItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+const mainItems = [
+  { title: "Assistente IA", url: "/", icon: Sparkles },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Vagas e Pipeline", url: "/vagas", icon: Briefcase },
   { title: "Métricas", url: "/metricas", icon: BarChart3 },
 ];
@@ -23,7 +24,6 @@ const generalItems = [
 const toolItems = [
   { title: "Custo de Vagas", url: "/custo", icon: Calculator },
   { title: "Benchmarking", url: "/benchmarking", icon: LineChart },
-  { title: "Assistente IA", url: "/assistente", icon: Sparkles },
   { title: "Reporting", url: "/emails", icon: Mail },
 ];
 
@@ -32,8 +32,9 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
 
   const renderItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive =
-      location === item.url ||
-      (item.url !== "/" && location.startsWith(item.url));
+      item.url === "/"
+        ? location === "/" || location === "/assistente"
+        : location === item.url || location.startsWith(item.url + "/");
     return (
       <Link
         key={item.title}
@@ -72,11 +73,11 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
         <div>
           {!collapsed && (
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-2">
-              Geral
+              Principal
             </p>
           )}
           <div className="space-y-0.5">
-            {generalItems.map(renderItem)}
+            {mainItems.map(renderItem)}
           </div>
         </div>
 

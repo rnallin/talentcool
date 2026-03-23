@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Sparkles, Loader2 } from "lucide-react";
+import { Send, Bot, User, Sparkles, Loader2, ArrowRight } from "lucide-react";
 
 interface Message {
   id: string;
@@ -8,12 +8,12 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  "Quantas vagas estão abertas?",
-  "Qual departamento tem mais candidatos?",
-  "Qual o custo estimado das vagas abertas?",
-  "Quais candidatos estão na etapa de entrevista?",
-  "Resumo geral do recrutamento",
-  "Qual o tempo médio de contratação?",
+  { text: "Quantas vagas estão abertas?", emoji: "📋" },
+  { text: "Qual departamento tem mais candidatos?", emoji: "👥" },
+  { text: "Qual o custo estimado das vagas abertas?", emoji: "💰" },
+  { text: "Quais candidatos estão na etapa de entrevista?", emoji: "🎯" },
+  { text: "Resumo geral do recrutamento", emoji: "📊" },
+  { text: "Qual o tempo médio de contratação?", emoji: "⏱️" },
 ];
 
 function parseMarkdown(text: string): string {
@@ -41,12 +41,21 @@ function parseMarkdown(text: string): string {
   return html;
 }
 
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Bom dia";
+  if (h < 18) return "Boa tarde";
+  return "Boa noite";
+}
+
 export default function Assistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const hasMessages = messages.length > 0;
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,6 +73,12 @@ export default function Assistant() {
       sendMessage(q);
     }
   }, []);
+
+  useEffect(() => {
+    if (!hasMessages) {
+      inputRef.current?.focus();
+    }
+  }, [hasMessages]);
 
   async function sendMessage(text?: string) {
     const messageText = text ?? input.trim();
@@ -162,86 +177,115 @@ export default function Assistant() {
     }
   }
 
-  return (
-    <div className="flex flex-col h-full -mt-2">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">Assistente IA</h1>
-          <p className="text-sm text-muted-foreground">Pergunte qualquer coisa sobre seus dados de RH</p>
-        </div>
-      </div>
-
-      <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-border bg-card">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full p-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-              <Bot className="w-8 h-8 text-primary" />
+  if (!hasMessages) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full -mt-8 px-4">
+        <div className="max-w-2xl w-full flex flex-col items-center">
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-medium mb-6">
+              <Sparkles className="w-3.5 h-3.5" />
+              Talent Cool IA
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">Como posso ajudar?</h2>
-            <p className="text-sm text-muted-foreground mb-8 text-center max-w-md">
-              Busque informações sobre vagas, candidatos, departamentos, métricas e custos da sua plataforma.
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
+              {getGreeting()}, Ana
+            </h1>
+            <p className="text-lg text-muted-foreground mt-3">
+              Como posso ajudar com o recrutamento hoje?
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => sendMessage(s)}
-                  className="text-left px-4 py-3 rounded-lg border border-border bg-background hover:bg-muted/50 hover:border-primary/30 transition-colors text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {s}
-                </button>
-              ))}
+          </div>
+
+          <div className="w-full mb-8">
+            <div className="flex items-end gap-2 p-2 rounded-2xl border border-border bg-card shadow-sm focus-within:border-primary/50 focus-within:shadow-md transition-all">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Pergunte sobre vagas, candidatos, métricas..."
+                rows={1}
+                className="flex-1 resize-none bg-transparent border-none outline-none text-sm px-3 py-3 text-foreground placeholder:text-muted-foreground min-h-[48px] max-h-[120px]"
+                style={{ fieldSizing: "content" } as any}
+                disabled={isStreaming}
+              />
+              <button
+                onClick={() => sendMessage()}
+                disabled={!input.trim() || isStreaming}
+                className="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-30 hover:bg-primary/90 transition-colors"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
-        ) : (
-          <div className="p-4 space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
-                {msg.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[75%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/50"
-                  }`}
-                >
-                  {msg.role === "assistant" ? (
-                    msg.content ? (
-                      <div
-                        className="prose prose-sm max-w-none [&_strong]:font-semibold [&_code]:text-xs"
-                        dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Analisando seus dados...</span>
-                      </div>
-                    )
-                  ) : (
-                    msg.content
-                  )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 w-full">
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s.text}
+                onClick={() => sendMessage(s.text)}
+                className="group flex items-center gap-3 text-left px-4 py-3.5 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/30 hover:shadow-sm transition-all text-sm text-muted-foreground hover:text-foreground"
+              >
+                <span className="text-base shrink-0">{s.emoji}</span>
+                <span className="flex-1">{s.text}</span>
+                <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-50 group-hover:translate-x-0 transition-all" />
+              </button>
+            ))}
+          </div>
+
+          <p className="text-xs text-muted-foreground/60 mt-8">
+            A IA usa dados reais da sua plataforma para responder.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full max-w-3xl mx-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto py-4">
+        <div className="space-y-6">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
+              {msg.role === "assistant" && (
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
-                {msg.role === "user" && (
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-1">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                  </div>
+              )}
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    : "bg-transparent"
+                }`}
+              >
+                {msg.role === "assistant" ? (
+                  msg.content ? (
+                    <div
+                      className="prose prose-sm max-w-none [&_strong]:font-semibold [&_code]:text-xs"
+                      dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Analisando seus dados...</span>
+                    </div>
+                  )
+                ) : (
+                  msg.content
                 )}
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+              {msg.role === "user" && (
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-0.5 text-primary font-bold text-xs">
+                  AS
+                </div>
+              )}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      <div className="mt-4">
-        <div className="flex items-end gap-2 p-2 rounded-xl border border-border bg-card focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+      <div className="shrink-0 pt-4 pb-2">
+        <div className="flex items-end gap-2 p-2 rounded-2xl border border-border bg-card shadow-sm focus-within:border-primary/50 focus-within:shadow-md transition-all">
           <textarea
             ref={inputRef}
             value={input}
@@ -249,24 +293,24 @@ export default function Assistant() {
             onKeyDown={handleKeyDown}
             placeholder="Pergunte sobre vagas, candidatos, métricas..."
             rows={1}
-            className="flex-1 resize-none bg-transparent border-none outline-none text-sm px-2 py-2 text-foreground placeholder:text-muted-foreground min-h-[40px] max-h-[120px]"
+            className="flex-1 resize-none bg-transparent border-none outline-none text-sm px-3 py-3 text-foreground placeholder:text-muted-foreground min-h-[48px] max-h-[120px]"
             style={{ fieldSizing: "content" } as any}
             disabled={isStreaming}
           />
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || isStreaming}
-            className="shrink-0 w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 hover:bg-primary/90 transition-colors"
+            className="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-30 hover:bg-primary/90 transition-colors"
           >
             {isStreaming ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <ArrowRight className="w-5 h-5" />
             )}
           </button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          O assistente usa dados reais da sua plataforma para responder.
+        <p className="text-xs text-muted-foreground/60 mt-2 text-center">
+          A IA usa dados reais da sua plataforma para responder.
         </p>
       </div>
     </div>
