@@ -187,4 +187,134 @@ router.post("/ai/search", async (req, res) => {
   }
 });
 
+const JOB_DESCRIPTION_SYSTEM_PROMPT = `Você é um especialista em Recrutamento e Seleção com foco em Copywriting para o mercado brasileiro.
+Sua missão é criar descrições de vagas que convertam, atraiam os melhores talentos e sejam otimizadas para plataformas de emprego (SEO).
+
+Regras:
+- Escreva sempre em português brasileiro (pt-BR)
+- Use linguagem inclusiva e neutra (sem viés de gênero, idade ou origem)
+- Foque em benefícios e resultados, não apenas tarefas
+- Use verbos de ação no infinitivo para responsabilidades
+- Organize as informações com Markdown (## para seções, - para listas)
+- Formate salários no padrão brasileiro (R$ X.XXX)
+
+A descrição DEVE seguir esta estrutura exata com estas seções:
+
+## 🎯 Sobre a Oportunidade
+Um parágrafo de gancho que venda o desafio, a missão da empresa e por que essa vaga é especial. Deve despertar o interesse imediato do candidato.
+
+## 📋 Responsabilidades
+Lista de 5-8 atividades focadas em resultados e impacto, não apenas tarefas operacionais.
+
+## ✅ Requisitos Essenciais
+Lista de 4-6 competências eliminatórias (o que o candidato DEVE ter).
+
+## ⭐ Diferenciais Desejáveis
+Lista de 3-5 competências que somam pontos mas não eliminam.
+
+## 💼 Benefícios e Cultura
+Lista de benefícios reais e aspectos culturais da empresa.
+
+## 📍 Informações da Vaga
+Resumo com: Modelo de trabalho, Localização, Faixa salarial, Senioridade.
+
+Ao final, adicione uma seção separada:
+
+## 🔍 Análise DEI (Diversidade, Equidade e Inclusão)
+Revise o texto gerado e liste:
+- Palavras ou expressões potencialmente excludentes encontradas (se houver)
+- Sugestões de termos mais inclusivos
+- Avaliação geral do nível de inclusividade (Alto/Médio/Baixo)
+
+## 💡 Perguntas de Triagem Sugeridas
+Sugira 3 perguntas de knock-out para o formulário de inscrição, focadas em validar os requisitos essenciais.`;
+
+router.post("/ai/job-description", async (req, res) => {
+  try {
+    const {
+      title, seniority, workMode, location, department,
+      tone, differentials, keywords, salaryRange, format
+    } = req.body as {
+      title: string;
+      seniority: string;
+      workMode: string;
+      location: string;
+      department?: string;
+      tone?: string;
+      differentials?: string;
+      keywords?: string;
+      salaryRange?: string;
+      format?: string;
+    };
+
+    if (!title || typeof title !== "string") {
+      res.status(400).json({ error: "Campo 'title' é obrigatório" });
+      return;
+    }
+
+    const seniorityLabels: Record<string, string> = {
+      junior: "Júnior", pleno: "Pleno", senior: "Sênior",
+      especialista: "Especialista", gerente: "Gerente", diretor: "Diretor",
+    };
+    const workModeLabels: Record<string, string> = {
+      presencial: "Presencial", hibrido: "Híbrido", remoto: "Remoto",
+    };
+    const toneLabels: Record<string, string> = {
+      formal: "Formal e corporativo",
+      casual: "Descontraído e acessível",
+      innovative: "Inovador e inspirador",
+    };
+
+    let userPrompt = `Crie uma descrição completa para a seguinte vaga:\n\n`;
+    userPrompt += `**Cargo:** ${title}\n`;
+    userPrompt += `**Senioridade:** ${seniorityLabels[seniority] ?? seniority}\n`;
+    userPrompt += `**Modelo:** ${workModeLabels[workMode] ?? workMode}\n`;
+    userPrompt += `**Localização:** ${location}\n`;
+    if (department) userPrompt += `**Departamento:** ${department}\n`;
+    if (salaryRange) userPrompt += `**Faixa Salarial:** ${salaryRange}\n`;
+    if (tone) userPrompt += `\n**Tom de voz:** ${toneLabels[tone] ?? tone}\n`;
+    if (differentials) userPrompt += `\n**Diferenciais desta vaga:** ${differentials}\n`;
+    if (keywords) userPrompt += `\n**Palavras-chave importantes para SEO:** ${keywords}\n`;
+
+    if (format === "linkedin") {
+      userPrompt += `\nADAPTAÇÃO: Gere o texto otimizado para LinkedIn — mais curto, direto, com emojis estratégicos e tom que engaje. Mantenha as seções mas seja mais conciso.`;
+    } else if (format === "portal") {
+      userPrompt += `\nADAPTAÇÃO: Gere o texto no formato completo para portal de vagas — estruturado, formal e detalhado.`;
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const openai = await getOpenAI();
+    const stream = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_completion_tokens: 4096,
+      messages: [
+        { role: "system", content: JOB_DESCRIPTION_SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      }
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
+  } catch (error: any) {
+    console.error("Job description AI error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Erro ao gerar descrição da vaga" });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: "Erro ao processar" })}\n\n`);
+      res.end();
+    }
+  }
+});
+
 export default router;

@@ -1,0 +1,41 @@
+Implementar uma funcionalidade de IA para criação de descrições de vagas é um excelente diferencial, especialmente para o seu software. O segredo não é apenas "gerar texto", mas garantir que o conteúdo seja estratégico para atrair o talento certo e otimizado para os algoritmos das plataformas (SEO).
+
+Aqui estão as minhas sugestões de como estruturar essa funcionalidade:
+
+---
+
+## 1. O Fluxo de Entrada (Input Estruturado)
+Para evitar descrições genéricas, a IA precisa de contexto. Em vez de um campo de texto livre, utilize um **formulário inteligente** que alimente o prompt:
+
+* **Dados Básicos:** Título do cargo, senioridade, modelo (Presencial/Híbrido/Remoto) e localização.
+* **Cultura e Tom de Voz:** Opções para o usuário escolher se o texto deve ser "Formal", "Descontraído" ou "Inovador".
+* **Diferenciais do RH:** Um campo para "O que torna esta vaga única?" (ex: bônus agressivo, equipe internacional, stock options).
+* **Keywords:** Integração com as palavras-chave mais buscadas para aquele cargo no mercado (ajuda no SEO do LinkedIn).
+
+## 2. Pilares da Descrição Gerada
+A IA deve seguir uma estrutura comprovada de conversão:
+
+| Seção | Objetivo |
+| :--- | :--- |
+| **Hook (Gancho)** | Um parágrafo inicial que vende o desafio e a missão da empresa. |
+| **Responsabilidades** | Lista de atividades focada em resultados, não apenas tarefas. |
+| **Requisitos (Must-have)** | O que é eliminatório (evita candidatos desqualificados). |
+| **Desejáveis (Nice-to-have)** | Competências que somam pontos, mas não eliminam. |
+| **Benefícios e Cultura** | O "porquê" trabalhar com vocês. |
+
+## 3. Funcionalidades de "Valor Agregado"
+Para tornar a ferramenta indispensável, adicione estes recursos:
+
+* **Análise de Viés (DEI):** Use a IA para detectar palavras que possam desencorajar minorias ou que sugiram viés de gênero/idade, sugerindo termos neutros.
+* **Multi-Formato:** Um botão para "Adaptar para LinkedIn" (texto curto e emojis) vs "Adaptar para Portal de Vagas" (texto estruturado e formal).
+* **Sugestão de Salário:** Baseado no cargo e região, a IA pode sugerir um range salarial competitivo (usando dados de mercado integrados).
+* **Gerador de Perguntas de Triagem:** Junto com a descrição, a IA já sugere 3 perguntas de "knock-out" para o formulário de inscrição.
+
+## 4. Dica Técnica de Implementação
+Não envie apenas "Escreva uma vaga de Vendedor". Use um **System Prompt** robusto:
+
+> *"Você é um especialista em Recrutamento e Seleção com foco em Copywriting. Sua missão é criar descrições de vagas que convertam. Use linguagem inclusiva, foque em benefícios e organize as informações em tópicos claros. Priorize verbos de ação."*
+
+---
+
+**Como você imagina a interface disso?** Se quiser, posso te ajudar a desenhar o **prompt ideal** para os seus desenvolvedores testarem no backend ou até sugerir como estruturar o banco de dados para essa funcionalidade.

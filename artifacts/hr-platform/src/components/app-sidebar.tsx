@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Sparkles,
   Mail,
+  FileText,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
@@ -22,6 +23,7 @@ const mainItems = [
 ];
 
 const toolItems = [
+  { title: "Descrição de Vagas", url: "/descricao-vaga", icon: FileText },
   { title: "Custo de Vagas", url: "/custo", icon: Calculator },
   { title: "Benchmarking", url: "/benchmarking", icon: LineChart },
   { title: "Reporting", url: "/emails", icon: Mail },

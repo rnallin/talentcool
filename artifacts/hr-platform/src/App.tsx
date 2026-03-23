@@ -13,6 +13,7 @@ import Metrics from "@/pages/metrics";
 import Benchmarking from "@/pages/benchmarking";
 import Assistant from "@/pages/assistant";
 import Emails from "@/pages/emails";
+import JobDescription from "@/pages/job-description";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/benchmarking" component={Benchmarking} />
         <Route path="/assistente" component={Assistant} />
         <Route path="/emails" component={Emails} />
+        <Route path="/descricao-vaga" component={JobDescription} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
