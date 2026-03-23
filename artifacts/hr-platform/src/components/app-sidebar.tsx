@@ -63,7 +63,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
         collapsed ? "w-[68px]" : "w-60"
       } shrink-0 relative`}
     >
-      <div className="flex h-16 items-center px-4 border-b border-[hsl(var(--sidebar-border))]">
+      <div className="flex h-14 items-center px-4 border-b border-[hsl(var(--sidebar-border))]">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0">
           TC
         </div>
