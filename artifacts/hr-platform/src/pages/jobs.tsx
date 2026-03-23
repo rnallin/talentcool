@@ -311,18 +311,51 @@ function PipelineKanbanView({
   );
 }
 
+function getJobPerfStyle(days: number, status: string) {
+  if (status === "closed") return {
+    card: "bg-slate-50 border-slate-200",
+    badge: "bg-slate-100 text-slate-600 border-slate-200",
+    daysBg: "bg-slate-100 text-slate-600",
+    footer: "bg-slate-100/60 border-slate-200",
+    icon: "text-slate-400",
+  };
+  if (days <= 15) return {
+    card: "bg-emerald-50/70 border-emerald-200",
+    badge: "bg-emerald-500 text-white border-emerald-500",
+    daysBg: "bg-emerald-100 text-emerald-700",
+    footer: "bg-emerald-100/50 border-emerald-200/60",
+    icon: "text-emerald-500",
+  };
+  if (days <= 35) return {
+    card: "bg-amber-50/70 border-amber-200",
+    badge: "bg-amber-500 text-white border-amber-500",
+    daysBg: "bg-amber-100 text-amber-700",
+    footer: "bg-amber-100/50 border-amber-200/60",
+    icon: "text-amber-500",
+  };
+  return {
+    card: "bg-rose-50/70 border-rose-200",
+    badge: "bg-rose-500 text-white border-rose-500",
+    daysBg: "bg-rose-100 text-rose-700",
+    footer: "bg-rose-100/50 border-rose-200/60",
+    icon: "text-rose-500",
+  };
+}
+
 function CardsView({ jobs }: { jobs: Job[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {jobs.map((job, idx) => (
+      {jobs.map((job, idx) => {
+        const perf = getJobPerfStyle(job.daysOpen, job.status);
+        return (
         <Link key={job.id} href={`/vagas/${job.id}`}>
-          <Card className="card-hover h-full flex flex-col cursor-pointer border-border/60 rounded-2xl group fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
+          <Card className={`card-hover h-full flex flex-col cursor-pointer rounded-2xl group fade-in-up border ${perf.card}`} style={{ animationDelay: `${idx * 50}ms` }}>
             <CardHeader className="pb-3 relative">
               <div className="flex justify-between items-start mb-2">
                 <Badge variant="outline" className={`font-medium capitalize ${getStatusColor(job.status)}`}>
                   {getStatusLabel(job.status)}
                 </Badge>
-                <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${perf.daysBg}`}>
                   {job.daysOpen} dias
                 </span>
               </div>
@@ -330,28 +363,28 @@ function CardsView({ jobs }: { jobs: Job[] }) {
                 {job.title}
               </h3>
               <div className="flex items-center text-sm text-muted-foreground mt-2">
-                <Building2 className="w-4 h-4 mr-1.5" />
+                <Building2 className={`w-4 h-4 mr-1.5 ${perf.icon}`} />
                 {job.departmentName} • <span className="capitalize ml-1">{job.seniority}</span>
               </div>
             </CardHeader>
             <CardContent className="pb-4 flex-1">
               <div className="space-y-2.5">
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2 text-primary/60" />
+                  <MapPin className={`w-4 h-4 mr-2 ${perf.icon}`} />
                   <span className="capitalize">{job.workMode}</span>
                   <span className="mx-2">•</span>
                   <span className="truncate">{job.location}</span>
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2 text-primary/60" />
+                  <Calendar className={`w-4 h-4 mr-2 ${perf.icon}`} />
                   Abertura: {format(new Date(job.openedAt), "dd 'de' MMM", { locale: ptBR })}
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="pt-4 border-t border-border/50 bg-muted/20 flex justify-between items-center rounded-b-2xl">
+            <CardFooter className={`pt-4 border-t flex justify-between items-center rounded-b-2xl ${perf.footer}`}>
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="w-4 h-4 text-primary" />
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${job.status === "closed" ? "bg-slate-200" : perf.daysBg}`}>
+                  <Users className={`w-4 h-4 ${perf.icon}`} />
                 </div>
                 <span className="font-semibold text-foreground">
                   {job.candidateCount} <span className="text-muted-foreground font-normal">Candidatos</span>
@@ -363,7 +396,8 @@ function CardsView({ jobs }: { jobs: Job[] }) {
             </CardFooter>
           </Card>
         </Link>
-      ))}
+        );
+      })}
     </div>
   );
 }
