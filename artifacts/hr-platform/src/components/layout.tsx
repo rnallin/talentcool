@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Menu, Search, Sparkles } from "lucide-react";
+import { Menu, Search, Sparkles, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { AppSidebar } from "@/components/app-sidebar";
 
@@ -8,6 +8,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [searchValue, setSearchValue] = useState("");
   const [, navigate] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const toggle = () => setCollapsed((c) => !c);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -19,15 +21,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
-      <AppSidebar collapsed={collapsed} />
+      <AppSidebar collapsed={collapsed} onToggle={toggle} />
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex h-14 shrink-0 items-center px-5 bg-card border-b border-border z-10 sticky top-0 gap-3">
           <button
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={toggle}
             className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
-            aria-label="Toggle sidebar"
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            title={collapsed ? "Expandir menu" : "Recolher menu"}
           >
-            <Menu className="w-5 h-5" />
+            {collapsed ? (
+              <PanelLeftOpen className="w-5 h-5" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5" />
+            )}
           </button>
           <div className="h-4 w-px bg-border hidden sm:block" />
           <span className="text-sm font-medium text-muted-foreground hidden lg:block shrink-0">

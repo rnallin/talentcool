@@ -10,6 +10,8 @@ import {
   HelpCircle,
   Sparkles,
   Mail,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 
 const generalItems = [
@@ -25,7 +27,7 @@ const toolItems = [
   { title: "Reporting", url: "/emails", icon: Mail },
 ];
 
-export function AppSidebar({ collapsed }: { collapsed: boolean }) {
+export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const [location] = useLocation();
 
   const renderItem = (item: { title: string; url: string; icon: React.ElementType }) => {
@@ -44,31 +46,29 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         title={collapsed ? item.title : undefined}
       >
         <item.icon className="w-5 h-5 shrink-0" />
-        {!collapsed && <span>{item.title}</span>}
+        {!collapsed && <span className="whitespace-nowrap overflow-hidden">{item.title}</span>}
       </Link>
     );
   };
 
   return (
     <aside
-      className={`flex flex-col h-full bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] transition-all duration-300 ${
-        collapsed ? "w-16" : "w-60"
-      } shrink-0`}
+      className={`flex flex-col h-full bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        collapsed ? "w-[68px]" : "w-60"
+      } shrink-0 relative`}
     >
       <div className="flex h-16 items-center px-4 border-b border-[hsl(var(--sidebar-border))]">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs shrink-0">
           TC
         </div>
-        {!collapsed && (
-          <div className="ml-3 overflow-hidden">
-            <span className="font-display font-bold text-base leading-tight text-foreground block">
-              Talent Cool
-            </span>
-          </div>
-        )}
+        <div className={`ml-3 overflow-hidden transition-[opacity,width] duration-300 ${collapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
+          <span className="font-display font-bold text-base leading-tight text-foreground block whitespace-nowrap">
+            Talent Cool
+          </span>
+        </div>
       </div>
 
-      <nav className="flex-1 px-2 py-4 space-y-5 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-5 overflow-y-auto overflow-x-hidden">
         <div>
           {!collapsed && (
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-2">
@@ -91,24 +91,47 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
           </div>
         </div>
 
-        {!collapsed && (
-          <div>
+        <div>
+          {!collapsed && (
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-2">
               Outros
             </p>
-            <div className="space-y-0.5">
-              <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full">
-                <HelpCircle className="w-5 h-5 shrink-0" />
-                Ajuda
-              </button>
-              <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full">
-                <Settings className="w-5 h-5 shrink-0" />
-                Configurações
-              </button>
-            </div>
+          )}
+          <div className="space-y-0.5">
+            <button
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full ${collapsed ? "justify-center" : ""}`}
+              title={collapsed ? "Ajuda" : undefined}
+            >
+              <HelpCircle className="w-5 h-5 shrink-0" />
+              {!collapsed && <span>Ajuda</span>}
+            </button>
+            <button
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full ${collapsed ? "justify-center" : ""}`}
+              title={collapsed ? "Configurações" : undefined}
+            >
+              <Settings className="w-5 h-5 shrink-0" />
+              {!collapsed && <span>Configurações</span>}
+            </button>
           </div>
-        )}
+        </div>
       </nav>
+
+      <div className="px-2 py-2">
+        <button
+          onClick={onToggle}
+          className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
+          title={collapsed ? "Expandir menu" : "Recolher menu"}
+        >
+          {collapsed ? (
+            <ChevronsRight className="w-4 h-4 shrink-0" />
+          ) : (
+            <>
+              <ChevronsLeft className="w-4 h-4 shrink-0" />
+              <span>Recolher menu</span>
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="px-3 py-4 border-t border-[hsl(var(--sidebar-border))]">
         {!collapsed ? (
