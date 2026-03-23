@@ -401,6 +401,152 @@ router.post("/ai/market-intelligence", async (req, res) => {
   }
 });
 
+const ROI_REPORT_SYSTEM_PROMPT = `Você é um analista financeiro e consultor de RH especializado em calcular e apresentar ROI (Return on Investment) de plataformas de tecnologia para RH.
+
+Você vai receber métricas reais da plataforma Talent Cool e deve gerar um relatório executivo de ROI mostrando o valor gerado pela ferramenta para a empresa e para a área de RH.
+
+Regras:
+- Responda SEMPRE em português brasileiro (pt-BR)
+- Use dados reais fornecidos como base para cálculos
+- Formate números no padrão brasileiro (R$ X.XXX, separador de milhar com ponto)
+- Use markdown para formatar (negrito, listas, seções)
+- Seja analítico mas acessível — o relatório deve convencer um C-level
+- Inclua gráficos usando blocos \`\`\`chart sempre que possível
+
+REGRA IMPORTANTE DE VISUALIZAÇÃO:
+Use blocos \`\`\`chart com JSON para gráficos. Tipos: "bar", "pie", "area", "kpi"
+
+Formato KPI:
+\`\`\`chart
+{"type":"kpi","title":"Título","items":[{"label":"Métrica","value":"Valor"}]}
+\`\`\`
+
+Formato bar/area/pie:
+\`\`\`chart
+{"type":"bar","title":"Título","data":[{"name":"Label","value":10}]}
+\`\`\`
+
+O relatório DEVE seguir esta estrutura:
+
+1. **Resumo Executivo** — KPI cards com as principais métricas de ROI (economia total estimada, ROI %, horas economizadas/mês, redução no time-to-hire)
+
+2. **Redução de Tempo Operacional** — Quanto tempo a equipe de RH economiza com automação de processos manuais (triagem, agendamentos, comunicação, relatórios). Use gráfico de barras comparando "Antes" vs "Com Talent Cool". Calcule baseado no número de vagas e candidatos gerenciados.
+
+3. **Redução do Tempo de Contratação (Time-to-Hire)** — Mostre a melhoria no tempo de preenchimento de vagas. Use os dados reais de vagas abertas/fechadas. Compare com benchmark de mercado (~45 dias para posições gerais no Brasil).
+
+4. **Redução do Custo de Contratação (Cost-per-Hire)** — Calcule a economia considerando: menos horas da equipe, menos retrabalho, pipeline mais eficiente. Use gráfico comparativo.
+
+5. **Impacto nos KPIs da Área de RH** — Mostre como a plataforma impacta: taxa de conversão do funil, qualidade das contratações, satisfação do time de recrutamento, redução de turnover no período de experiência.
+
+6. **ROI Projetado (12 meses)** — Projeção de economia anual vs custo da plataforma. Use gráfico de área mostrando economia acumulada mês a mês.
+
+7. **Conclusão e Recomendações** — Resumo do valor gerado e próximos passos para maximizar o ROI.
+
+Seja realista nos cálculos. Use premissas de mercado brasileiro quando necessário e explicite as premissas usadas.`;
+
+router.post("/ai/roi-report", async (req, res) => {
+  try {
+    const platformData = await gatherPlatformData();
+
+    const jobs = platformData.vagas;
+    const totalJobs = jobs.length;
+    const openJobs = jobs.filter((j: any) => j.status === "open").length;
+    const closedJobs = jobs.filter((j: any) => j.status === "closed").length;
+    const totalCandidates = platformData.resumo.totalCandidatos;
+    const hired = platformData.resumo.contratados;
+    const departments = platformData.departamentos.length;
+
+    const closedJobsData = jobs.filter((j: any) => j.status === "closed" && j.abertoEm && j.fechadoEm);
+    let avgTimeToHire = 0;
+    if (closedJobsData.length > 0) {
+      const totalDays = closedJobsData.reduce((sum: number, j: any) => {
+        const opened = new Date(j.abertoEm);
+        const closed = new Date(j.fechadoEm);
+        return sum + Math.max(1, Math.ceil((closed.getTime() - opened.getTime()) / (1000 * 60 * 60 * 24)));
+      }, 0);
+      avgTimeToHire = Math.round(totalDays / closedJobsData.length);
+    }
+
+    const avgSalary = jobs.reduce((sum: number, j: any) => {
+      const avg = ((j.salarioMin || 0) + (j.salarioMax || 0)) / 2;
+      return sum + avg;
+    }, 0) / Math.max(1, totalJobs);
+
+    const conversionRate = totalCandidates > 0 ? ((hired / totalCandidates) * 100).toFixed(1) : "0";
+
+    const candidatesByStage = platformData.candidatosPorEtapa;
+
+    const roiContext = `
+DADOS REAIS DA PLATAFORMA TALENT COOL:
+
+Visão Geral:
+- Total de vagas cadastradas: ${totalJobs}
+- Vagas abertas: ${openJobs}
+- Vagas fechadas: ${closedJobs}
+- Total de candidatos: ${totalCandidates}
+- Candidatos contratados: ${hired}
+- Departamentos ativos: ${departments}
+- Taxa de conversão (candidato → contratado): ${conversionRate}%
+
+Tempo de Contratação:
+- Tempo médio de contratação (vagas fechadas): ${avgTimeToHire} dias
+- Benchmark de mercado Brasil: ~45 dias
+- Vagas com dados de tempo: ${closedJobsData.length}
+
+Salários:
+- Salário médio das posições: R$ ${Math.round(avgSalary).toLocaleString("pt-BR")}
+- Taxa de encargos: ${platformData.resumo.taxaEncargos}
+
+Funil de Candidatos por Etapa:
+${Object.entries(candidatesByStage).map(([stage, count]) => `- ${stage}: ${count}`).join("\n")}
+
+Departamentos:
+${platformData.departamentos.map((d: any) => `- ${d.nome}: headcount ${d.headcount}, ${d.vagasAbertas} vagas abertas`).join("\n")}
+
+PREMISSAS PARA CÁLCULO DE ROI:
+- Custo/hora médio de um profissional de RH no Brasil: R$ 55
+- Horas semanais em processos manuais SEM plataforma: ~25h por recrutador
+- Redução estimada com automação: 40-60%
+- Custo médio de contratação SEM plataforma (mercado): R$ 3.500-5.000
+- Custo da plataforma Talent Cool: R$ 2.500/mês (estimativa)
+- Equipe média de RH para esse volume: 2-3 recrutadores
+`;
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const openai = await getOpenAI();
+    const stream = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_completion_tokens: 8192,
+      messages: [
+        { role: "system", content: ROI_REPORT_SYSTEM_PROMPT },
+        { role: "user", content: `Gere o relatório de ROI completo da plataforma Talent Cool com base nos seguintes dados reais:\n\n${roiContext}\n\nData do relatório: ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}` },
+      ],
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      }
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
+  } catch (error: any) {
+    console.error("ROI report AI error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Erro ao gerar relatório de ROI" });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: "Erro ao processar" })}\n\n`);
+      res.end();
+    }
+  }
+});
+
 router.post("/ai/email-draft", async (req, res) => {
   try {
     const { prompt, context } = req.body as { prompt: string; context?: string };

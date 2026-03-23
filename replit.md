@@ -94,6 +94,8 @@ Color palette (Dribbble-inspired clean dashboard):
 - Search bar in top header with sparkle icon navigates to /assistente with query
 - /assistente page: chat interface with suggestion buttons, SSE streaming responses
 - Backend: POST /api/ai/search gathers all platform data (jobs, candidates, departments, metrics) and sends as context to GPT-4o-mini
+- ROI Report: POST /api/ai/roi-report — dedicated endpoint that calculates ROI metrics (time-to-hire reduction, cost savings, operational time savings, KPI impact) from real platform data and streams an executive report with charts
+- ROI Report triggered via special card on assistant home page (uses `__ROI_REPORT__` trigger constant)
 - Uses Replit AI Integrations (OpenAI proxy) — no API key needed, billed to credits
 - Lazy OpenAI client initialization to avoid startup failures
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Send, Bot, User, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Send, Bot, User, Sparkles, Loader2, ArrowRight, TrendingUp } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -10,6 +10,8 @@ interface Message {
   role: "user" | "assistant";
   content: string;
 }
+
+const ROI_REPORT_TRIGGER = "__ROI_REPORT__";
 
 const SUGGESTIONS = [
   { text: "Quero um relatório com todas as métricas", emoji: "📊" },
@@ -264,10 +266,13 @@ export default function Assistant() {
     const messageText = text ?? input.trim();
     if (!messageText || isStreaming) return;
 
+    const isRoiReport = messageText === ROI_REPORT_TRIGGER;
+    const displayText = isRoiReport ? "Gerar Relatório de ROI do Talent Cool" : messageText;
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: messageText,
+      content: displayText,
     };
 
     const assistantId = (Date.now() + 1).toString();
@@ -282,19 +287,29 @@ export default function Assistant() {
     setIsStreaming(true);
 
     try {
-      const history = messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
       const baseUrl = import.meta.env.BASE_URL || "/";
-      const apiUrl = `${baseUrl}api/ai/search`.replace(/\/\//g, "/");
 
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText, history }),
-      });
+      let response: Response;
+
+      if (isRoiReport) {
+        const apiUrl = `${baseUrl}api/ai/roi-report`.replace(/\/\//g, "/");
+        response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+      } else {
+        const history = messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+        const apiUrl = `${baseUrl}api/ai/search`.replace(/\/\//g, "/");
+        response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: messageText, history }),
+        });
+      }
 
       if (!response.ok) throw new Error("Erro na resposta do servidor");
 
@@ -396,6 +411,20 @@ export default function Assistant() {
               </button>
             </div>
           </div>
+
+          <button
+            onClick={() => sendMessage(ROI_REPORT_TRIGGER)}
+            className="group w-full flex items-center gap-4 text-left px-5 py-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-emerald-50/50 to-transparent hover:from-primary/10 hover:via-emerald-50 hover:border-primary/40 hover:shadow-md transition-all mb-4"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-semibold text-foreground block">Relatório de ROI</span>
+              <span className="text-xs text-muted-foreground">Analise o retorno do Talent Cool para a empresa e para o RH</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-primary opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0 transition-all shrink-0" />
+          </button>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 w-full">
             {SUGGESTIONS.map((s) => (
