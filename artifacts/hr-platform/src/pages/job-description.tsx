@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useListDepartments } from "@workspace/api-client-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,8 @@ import {
   Tag,
   Star,
   Download,
+  Zap,
+  Wand2,
 } from "lucide-react";
 
 function renderMarkdown(md: string): string {
@@ -87,7 +89,7 @@ export default function JobDescription() {
 
   const handleGenerate = async () => {
     if (!form.title.trim()) {
-      toast({ title: "Preencha o título do cargo", variant: "destructive" });
+      toast({ title: "Preencha o titulo do cargo", variant: "destructive" });
       return;
     }
     if (!form.location.trim()) {
@@ -185,36 +187,49 @@ export default function JobDescription() {
   };
 
   const toneOptions = [
-    { value: "formal", label: "Formal", desc: "Corporativo e profissional", icon: "🏢" },
-    { value: "casual", label: "Descontraído", desc: "Acessível e amigável", icon: "😊" },
-    { value: "innovative", label: "Inovador", desc: "Inspirador e moderno", icon: "🚀" },
+    { value: "formal", label: "Formal", desc: "Corporativo", icon: Building2, color: "text-slate-600", bg: "bg-slate-50", activeBg: "bg-slate-100", ring: "ring-slate-300" },
+    { value: "casual", label: "Descontraído", desc: "Amigável", icon: Sparkles, color: "text-amber-500", bg: "bg-amber-50", activeBg: "bg-amber-100", ring: "ring-amber-300" },
+    { value: "innovative", label: "Inovador", desc: "Moderno", icon: Zap, color: "text-violet-500", bg: "bg-violet-50", activeBg: "bg-violet-100", ring: "ring-violet-300" },
   ];
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">
-          Descrição de Vagas com IA
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Crie descrições profissionais, inclusivas e otimizadas para atrair os melhores talentos.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-100 flex items-center justify-center shrink-0">
+          <Wand2 className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-display font-bold tracking-tight text-foreground">
+              Descrição de Vagas
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-violet-500/10 to-primary/10 border border-violet-200/50">
+              <Sparkles className="w-3 h-3 text-violet-500" />
+              <span className="text-[10px] font-bold text-violet-600 uppercase tracking-wider">AI Powered</span>
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Crie descrições profissionais, inclusivas e otimizadas para atrair os melhores talentos.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
-        <div className="space-y-5">
-          <Card className="rounded-2xl border-border/60">
+        <div className="space-y-4">
+          <Card className="rounded-2xl border-border/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Briefcase className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Briefcase className="w-3.5 h-3.5 text-primary" />
+                </div>
                 <h3 className="text-sm font-semibold text-foreground">Dados da Vaga</h3>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Título do Cargo *</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Titulo do Cargo *</label>
                 <Input
                   placeholder="Ex: Desenvolvedor Full Stack Senior"
-                  className="rounded-xl"
+                  className="rounded-xl h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   value={form.title}
                   onChange={(e) => updateField("title", e.target.value)}
                 />
@@ -222,13 +237,13 @@ export default function JobDescription() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Senioridade</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Senioridade</label>
                   <Select value={form.seniority} onValueChange={(v) => updateField("seniority", v)}>
-                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-10"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="junior">Júnior</SelectItem>
+                      <SelectItem value="junior">Junior</SelectItem>
                       <SelectItem value="pleno">Pleno</SelectItem>
-                      <SelectItem value="senior">Sênior</SelectItem>
+                      <SelectItem value="senior">Senior</SelectItem>
                       <SelectItem value="especialista">Especialista</SelectItem>
                       <SelectItem value="gerente">Gerente</SelectItem>
                       <SelectItem value="diretor">Diretor</SelectItem>
@@ -236,12 +251,12 @@ export default function JobDescription() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Modalidade</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Modalidade</label>
                   <Select value={form.workMode} onValueChange={(v) => updateField("workMode", v)}>
-                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-10"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="presencial">Presencial</SelectItem>
-                      <SelectItem value="hibrido">Híbrido</SelectItem>
+                      <SelectItem value="hibrido">Hibrido</SelectItem>
                       <SelectItem value="remoto">Remoto</SelectItem>
                     </SelectContent>
                   </Select>
@@ -250,21 +265,21 @@ export default function JobDescription() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Localização *</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Localização *</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/60" />
                     <Input
                       placeholder="São Paulo, SP"
-                      className="rounded-xl pl-8"
+                      className="rounded-xl h-10 pl-8 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                       value={form.location}
                       onChange={(e) => updateField("location", e.target.value)}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Departamento</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Departamento</label>
                   <Select value={form.department} onValueChange={(v) => updateField("department", v)}>
-                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-10"><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
                       {departments?.map((d) => (
                         <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
@@ -276,21 +291,21 @@ export default function JobDescription() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Mín (R$)</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Salário Min (R$)</label>
                   <Input
                     type="number"
                     placeholder="5.000"
-                    className="rounded-xl"
+                    className="rounded-xl h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     value={form.salaryMin}
                     onChange={(e) => updateField("salaryMin", e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Salário Máx (R$)</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Salário Max (R$)</label>
                   <Input
                     type="number"
                     placeholder="12.000"
-                    className="rounded-xl"
+                    className="rounded-xl h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     value={form.salaryMax}
                     onChange={(e) => updateField("salaryMax", e.target.value)}
                   />
@@ -299,61 +314,78 @@ export default function JobDescription() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-border/60">
+          <Card className="rounded-2xl border-border/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Palette className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Palette className="w-3.5 h-3.5 text-primary" />
+                </div>
                 <h3 className="text-sm font-semibold text-foreground">Tom de Voz</h3>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {toneOptions.map((t) => (
-                  <button
-                    key={t.value}
-                    onClick={() => updateField("tone", t.value)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all ${
-                      form.tone === t.value
-                        ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                        : "border-border hover:border-primary/30 hover:bg-muted/30"
-                    }`}
-                  >
-                    <span className="text-lg">{t.icon}</span>
-                    <span className="text-xs font-semibold">{t.label}</span>
-                  </button>
-                ))}
+              <div className="grid grid-cols-3 gap-2.5">
+                {toneOptions.map((t) => {
+                  const isActive = form.tone === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => updateField("tone", t.value)}
+                      className={`group relative flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 text-center transition-all duration-200 cursor-pointer ${
+                        isActive
+                          ? `border-primary/40 ${t.activeBg} shadow-sm`
+                          : "border-transparent bg-muted/30 hover:bg-muted/60 hover:border-border"
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-xl ${isActive ? t.activeBg : t.bg} flex items-center justify-center transition-all duration-200 group-hover:scale-110`}>
+                        <t.icon className={`w-4.5 h-4.5 ${t.color} transition-transform duration-200`} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold block">{t.label}</span>
+                        <span className="text-[10px] text-muted-foreground">{t.desc}</span>
+                      </div>
+                      {isActive && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-border/60">
+          <Card className="rounded-2xl border-border/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Star className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Star className="w-3.5 h-3.5 text-primary" />
+                </div>
                 <h3 className="text-sm font-semibold text-foreground">Personalização</h3>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                   Diferenciais da vaga
                 </label>
                 <Textarea
-                  placeholder="Ex: Bônus agressivo, equipe internacional, stock options, day-off no aniversário..."
-                  className="rounded-xl resize-none min-h-[70px]"
+                  placeholder="Ex: Bonus agressivo, equipe internacional, stock options, day-off no aniversário..."
+                  className="rounded-xl resize-none min-h-[70px] transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   value={form.differentials}
                   onChange={(e) => updateField("differentials", e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  <div className="flex items-center gap-1">
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  <div className="flex items-center gap-1.5">
                     <Tag className="w-3 h-3" />
                     Palavras-chave SEO
                   </div>
                 </label>
                 <Input
                   placeholder="Ex: React, Node.js, AWS, Agile"
-                  className="rounded-xl"
+                  className="rounded-xl h-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   value={form.keywords}
                   onChange={(e) => updateField("keywords", e.target.value)}
                 />
@@ -361,42 +393,46 @@ export default function JobDescription() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-border/60">
+          <Card className="rounded-2xl border-border/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Globe className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Formato de Saída</h3>
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Globe className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">Formato de Saida</h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => updateField("format", "portal")}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border transition-all ${
-                    form.format === "portal"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border hover:border-primary/30"
-                  }`}
-                >
-                  <Globe className="w-5 h-5 text-primary/70" />
-                  <div className="text-left">
-                    <p className="text-xs font-semibold">Portal de Vagas</p>
-                    <p className="text-[10px] text-muted-foreground">Completo e detalhado</p>
-                  </div>
-                </button>
-                <button
-                  onClick={() => updateField("format", "linkedin")}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border transition-all ${
-                    form.format === "linkedin"
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border hover:border-primary/30"
-                  }`}
-                >
-                  <Linkedin className="w-5 h-5 text-blue-600/70" />
-                  <div className="text-left">
-                    <p className="text-xs font-semibold">LinkedIn</p>
-                    <p className="text-[10px] text-muted-foreground">Conciso com emojis</p>
-                  </div>
-                </button>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { value: "portal", label: "Portal de Vagas", desc: "Completo e detalhado", Icon: Globe, color: "text-primary/70", bg: "bg-primary/5" },
+                  { value: "linkedin", label: "LinkedIn", desc: "Conciso com emojis", Icon: Linkedin, color: "text-blue-600/70", bg: "bg-blue-50" },
+                ].map((opt) => {
+                  const isActive = form.format === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateField("format", opt.value)}
+                      className={`group relative flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all duration-200 ${
+                        isActive
+                          ? "border-primary/40 bg-primary/5 shadow-sm"
+                          : "border-transparent bg-muted/30 hover:bg-muted/60 hover:border-border"
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-xl ${opt.bg} flex items-center justify-center transition-transform duration-200 group-hover:scale-110`}>
+                        <opt.Icon className={`w-4.5 h-4.5 ${opt.color}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-semibold">{opt.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{opt.desc}</p>
+                      </div>
+                      {isActive && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -405,7 +441,7 @@ export default function JobDescription() {
             <Button
               onClick={handleStop}
               variant="outline"
-              className="w-full rounded-xl h-12 text-rose-600 border-rose-200 hover:bg-rose-50"
+              className="w-full rounded-xl h-12 text-rose-600 border-rose-200 hover:bg-rose-50 transition-all duration-200"
             >
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Parar Geração
@@ -413,9 +449,9 @@ export default function JobDescription() {
           ) : (
             <Button
               onClick={handleGenerate}
-              className="w-full rounded-xl h-12 bg-primary hover:bg-primary/90 text-white btn-fluid"
+              className="group w-full rounded-xl h-12 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Sparkles className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
               Gerar Descrição com IA
             </Button>
           )}
@@ -423,57 +459,64 @@ export default function JobDescription() {
 
         <div ref={outputRef}>
           {!output && !isGenerating ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-card rounded-2xl border border-dashed border-border">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <FileText className="w-8 h-8 text-primary/40" />
+            <div className="flex flex-col items-center justify-center h-full min-h-[500px] bg-gradient-to-b from-card to-muted/20 rounded-2xl border border-dashed border-border/60">
+              <div className="relative mb-5">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-primary/30" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 rounded-lg bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center border border-violet-200/50">
+                  <Sparkles className="w-3 h-3 text-violet-400" />
+                </div>
               </div>
               <h3 className="text-lg font-display font-semibold text-foreground mb-1">
                 Sua descrição aparecerá aqui
               </h3>
-              <p className="text-sm text-muted-foreground text-center max-w-sm">
+              <p className="text-sm text-muted-foreground text-center max-w-sm leading-relaxed">
                 Preencha os dados da vaga e clique em "Gerar Descrição com IA" para criar uma descrição profissional e otimizada.
               </p>
             </div>
           ) : (
-            <Card className="rounded-2xl border-border/60 h-full">
+            <Card className="rounded-2xl border-border/60 h-full shadow-sm">
               <div className="flex items-center justify-between px-5 py-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-3.5 h-3.5 text-primary" />
+                  </div>
                   <h3 className="text-sm font-semibold text-foreground">
                     {isGenerating ? "Gerando descrição..." : "Descrição Gerada"}
                   </h3>
                   {isGenerating && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
                 </div>
                 {output && !isGenerating && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleGenerate}
-                      className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                      className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1.5 transition-all duration-200 hover:bg-muted"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                      <RefreshCw className="w-3.5 h-3.5" />
                       Regenerar
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleDownload}
-                      className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                      className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1.5 transition-all duration-200 hover:bg-muted"
                     >
-                      <Download className="w-3.5 h-3.5 mr-1.5" />
+                      <Download className="w-3.5 h-3.5" />
                       Baixar
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleCopy}
-                      className="h-8 text-xs rounded-lg"
+                      className="h-8 text-xs rounded-lg gap-1.5 transition-all duration-200"
                     >
                       {copied ? (
-                        <><Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" /> Copiado!</>
+                        <><Check className="w-3.5 h-3.5 text-emerald-600" /> Copiado!</>
                       ) : (
-                        <><Copy className="w-3.5 h-3.5 mr-1.5" /> Copiar</>
+                        <><Copy className="w-3.5 h-3.5" /> Copiar</>
                       )}
                     </Button>
                   </div>
