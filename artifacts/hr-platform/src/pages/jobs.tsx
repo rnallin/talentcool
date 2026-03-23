@@ -132,7 +132,7 @@ export default function Jobs() {
                   <FormField control={form.control} name="departmentId" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Departamento</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                      <Select onValueChange={(val) => field.onChange(Number(val))} value={field.value ? String(field.value) : undefined}>
                         <FormControl>
                           <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger>
                         </FormControl>
