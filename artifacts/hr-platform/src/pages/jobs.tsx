@@ -82,14 +82,27 @@ const FALLBACK_STAGES: PipelineStage[] = [
   { id: 6, name: "reprovado", label: "Reprovado", color: "border-rose-300 bg-rose-50/60", position: 6, isTerminal: true, createdAt: new Date().toISOString() },
 ];
 
-const STAGE_STYLES: Record<string, { dot: string; countBg: string; border: string }> = {
-  triagem: { dot: "bg-slate-400", countBg: "bg-slate-100 text-slate-600", border: "border-slate-300 bg-slate-50/40" },
-  entrevista_rh: { dot: "bg-emerald-500", countBg: "bg-emerald-100 text-emerald-700", border: "border-emerald-300 bg-emerald-50/40" },
-  entrevista_tecnica: { dot: "bg-blue-500", countBg: "bg-blue-100 text-blue-700", border: "border-blue-300 bg-blue-50/40" },
-  proposta: { dot: "bg-amber-500", countBg: "bg-amber-100 text-amber-700", border: "border-amber-300 bg-amber-50/40" },
-  contratado: { dot: "bg-emerald-600", countBg: "bg-emerald-100 text-emerald-800", border: "border-emerald-400 bg-emerald-50/40" },
-  reprovado: { dot: "bg-rose-500", countBg: "bg-rose-100 text-rose-700", border: "border-rose-300 bg-rose-50/40" },
+const STAGE_STYLES: Record<string, { dot: string; countBg: string; border: string; cardBg: string; cardBorder: string; avatarBg: string; avatarText: string }> = {
+  triagem: { dot: "bg-slate-400", countBg: "bg-slate-100 text-slate-600", border: "border-slate-300 bg-slate-50/40", cardBg: "bg-slate-50/80", cardBorder: "border-slate-200", avatarBg: "bg-slate-200", avatarText: "text-slate-700" },
+  entrevista_rh: { dot: "bg-emerald-500", countBg: "bg-emerald-100 text-emerald-700", border: "border-emerald-300 bg-emerald-50/40", cardBg: "bg-emerald-50/60", cardBorder: "border-emerald-200", avatarBg: "bg-emerald-200", avatarText: "text-emerald-800" },
+  entrevista_tecnica: { dot: "bg-blue-500", countBg: "bg-blue-100 text-blue-700", border: "border-blue-300 bg-blue-50/40", cardBg: "bg-blue-50/60", cardBorder: "border-blue-200", avatarBg: "bg-blue-200", avatarText: "text-blue-800" },
+  proposta: { dot: "bg-amber-500", countBg: "bg-amber-100 text-amber-700", border: "border-amber-300 bg-amber-50/40", cardBg: "bg-amber-50/60", cardBorder: "border-amber-200", avatarBg: "bg-amber-200", avatarText: "text-amber-800" },
+  contratado: { dot: "bg-emerald-600", countBg: "bg-emerald-100 text-emerald-800", border: "border-emerald-400 bg-emerald-50/40", cardBg: "bg-emerald-50/70", cardBorder: "border-emerald-300", avatarBg: "bg-emerald-300", avatarText: "text-emerald-900" },
+  reprovado: { dot: "bg-rose-500", countBg: "bg-rose-100 text-rose-700", border: "border-rose-300 bg-rose-50/40", cardBg: "bg-rose-50/60", cardBorder: "border-rose-200", avatarBg: "bg-rose-200", avatarText: "text-rose-800" },
 };
+
+function getDaysInStage(updatedAt: string): number {
+  return Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getPerformanceIndicator(days: number, isTerminal: boolean) {
+  if (isTerminal) return null;
+  if (days <= 15) return { color: "bg-emerald-500", ring: "ring-emerald-200", label: `${days}d`, tooltip: "No prazo" };
+  if (days <= 35) return { color: "bg-amber-500", ring: "ring-amber-200", label: `${days}d`, tooltip: "Atenção" };
+  return { color: "bg-rose-500", ring: "ring-rose-200", label: `${days}d`, tooltip: "Crítico" };
+}
+
+const TERMINAL_STAGES = new Set(["contratado", "reprovado"]);
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -119,13 +132,18 @@ function getInitials(name: string) {
 }
 
 function PipelineCandidateCard({ candidate, index }: { candidate: AllCandidate; index: number }) {
+  const stageStyle = STAGE_STYLES[candidate.stage] ?? STAGE_STYLES.triagem;
+  const days = getDaysInStage(candidate.updatedAt);
+  const isTerminal = TERMINAL_STAGES.has(candidate.stage);
+  const perf = getPerformanceIndicator(days, isTerminal);
+
   return (
     <Draggable draggableId={`cand-${candidate.id}`} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`group bg-card rounded-xl border border-border/60 p-3.5 transition-shadow duration-200 ${snapshot.isDragging ? "shadow-xl ring-2 ring-primary/20 rotate-1" : "shadow-sm hover:shadow-md"}`}
+          className={`group rounded-xl border p-3.5 transition-all duration-200 ${stageStyle.cardBg} ${stageStyle.cardBorder} ${snapshot.isDragging ? "shadow-xl ring-2 ring-primary/20 rotate-1 scale-[1.02]" : "shadow-sm hover:shadow-md"}`}
         >
           <div className="flex items-start gap-2.5">
             <div
@@ -135,12 +153,22 @@ function PipelineCandidateCard({ candidate, index }: { candidate: AllCandidate; 
               <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
 
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-primary">{getInitials(candidate.name)}</span>
+            <div className={`w-8 h-8 rounded-full ${stageStyle.avatarBg} flex items-center justify-center shrink-0`}>
+              <span className={`text-[10px] font-bold ${stageStyle.avatarText}`}>{getInitials(candidate.name)}</span>
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground leading-snug truncate">{candidate.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-foreground leading-snug truncate flex-1">{candidate.name}</p>
+                {perf && (
+                  <span
+                    title={perf.tooltip}
+                    className={`shrink-0 inline-flex items-center gap-1 text-[10px] font-bold text-white px-1.5 py-0.5 rounded-full ${perf.color} ring-1 ${perf.ring}`}
+                  >
+                    {perf.label}
+                  </span>
+                )}
+              </div>
               <Link href={`/vagas/${candidate.jobId}`}>
                 <p className="text-xs text-primary/80 hover:text-primary hover:underline truncate cursor-pointer mt-0.5">{candidate.jobTitle}</p>
               </Link>
@@ -148,10 +176,10 @@ function PipelineCandidateCard({ candidate, index }: { candidate: AllCandidate; 
           </div>
 
           <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-md px-1.5 py-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-white/60 rounded-md px-1.5 py-0.5">
               {getSourceLabel(candidate.source)}
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-md px-1.5 py-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-white/60 rounded-md px-1.5 py-0.5">
               <Clock className="w-2.5 h-2.5" />
               {formatDistanceToNow(new Date(candidate.updatedAt), { locale: ptBR, addSuffix: false })}
             </span>
@@ -202,8 +230,38 @@ function PipelineKanbanView({
     }
   };
 
+  const perfSummary = useMemo(() => {
+    let green = 0, yellow = 0, red = 0;
+    filtered.forEach((c) => {
+      if (TERMINAL_STAGES.has(c.stage)) return;
+      const d = getDaysInStage(c.updatedAt);
+      if (d <= 15) green++;
+      else if (d <= 35) yellow++;
+      else red++;
+    });
+    return { green, yellow, red };
+  }, [filtered]);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="flex items-center gap-4 mb-3 text-xs">
+        <span className="text-muted-foreground font-medium">Performance:</span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="text-muted-foreground">0-15d</span>
+          <span className="font-semibold text-foreground">{perfSummary.green}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+          <span className="text-muted-foreground">16-35d</span>
+          <span className="font-semibold text-foreground">{perfSummary.yellow}</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+          <span className="text-muted-foreground">36d+</span>
+          <span className="font-semibold text-foreground">{perfSummary.red}</span>
+        </span>
+      </div>
       <div className="overflow-x-auto pb-4 -mx-2 px-2">
         <div className="flex gap-4 min-w-max">
           {stages.map((stage) => {
