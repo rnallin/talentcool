@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
-import { useListJobs, useCreateJob, useUpdateJob, useListDepartments } from "@workspace/api-client-react";
-import type { Job, CreateJobBody } from "@workspace/api-client-react";
+import { useListJobs, useCreateJob, useUpdateCandidate, useListDepartments, useListPipelineStages } from "@workspace/api-client-react";
+import type { Job, CreateJobBody, PipelineStage } from "@workspace/api-client-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -17,10 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/formatters";
 import {
   Briefcase,
   Building2,
@@ -32,9 +31,33 @@ import {
   Kanban,
   LayoutGrid,
   Clock,
-  ArrowRight,
   GripVertical,
 } from "lucide-react";
+
+interface AllCandidate {
+  id: number;
+  jobId: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  stage: string;
+  source: string;
+  appliedAt: string;
+  updatedAt: string;
+  notes: string | null;
+  jobTitle: string;
+}
+
+function useAllCandidates() {
+  return useQuery<AllCandidate[]>({
+    queryKey: ["/api/candidates/all"],
+    queryFn: async () => {
+      const res = await fetch("/api/candidates/all");
+      if (!res.ok) throw new Error("Failed to fetch candidates");
+      return res.json();
+    },
+  });
+}
 
 const createJobSchema = z.object({
   title: z.string().min(3, "Título deve ter no mínimo 3 caracteres"),
@@ -50,11 +73,23 @@ const createJobSchema = z.object({
 
 type ViewMode = "kanban" | "cards";
 
-const STATUS_COLUMNS = [
-  { key: "open" as const, label: "Abertas", color: "border-emerald-300 bg-emerald-50/60", dotColor: "bg-emerald-500", countBg: "bg-emerald-100 text-emerald-700" },
-  { key: "paused" as const, label: "Pausadas", color: "border-amber-300 bg-amber-50/60", dotColor: "bg-amber-500", countBg: "bg-amber-100 text-amber-700" },
-  { key: "closed" as const, label: "Fechadas", color: "border-slate-300 bg-slate-50/60", dotColor: "bg-slate-400", countBg: "bg-slate-100 text-slate-600" },
-] as const;
+const FALLBACK_STAGES: PipelineStage[] = [
+  { id: 1, name: "triagem", label: "Triagem", color: "border-slate-300 bg-slate-50/60", position: 1, isTerminal: false, createdAt: new Date().toISOString() },
+  { id: 2, name: "entrevista_rh", label: "Entrevista RH", color: "border-emerald-300 bg-emerald-50/60", position: 2, isTerminal: false, createdAt: new Date().toISOString() },
+  { id: 3, name: "entrevista_tecnica", label: "Entrevista Técnica", color: "border-blue-300 bg-blue-50/60", position: 3, isTerminal: false, createdAt: new Date().toISOString() },
+  { id: 4, name: "proposta", label: "Proposta", color: "border-amber-300 bg-amber-50/60", position: 4, isTerminal: false, createdAt: new Date().toISOString() },
+  { id: 5, name: "contratado", label: "Contratado", color: "border-emerald-400 bg-emerald-50/60", position: 5, isTerminal: true, createdAt: new Date().toISOString() },
+  { id: 6, name: "reprovado", label: "Reprovado", color: "border-rose-300 bg-rose-50/60", position: 6, isTerminal: true, createdAt: new Date().toISOString() },
+];
+
+const STAGE_STYLES: Record<string, { dot: string; countBg: string; border: string }> = {
+  triagem: { dot: "bg-slate-400", countBg: "bg-slate-100 text-slate-600", border: "border-slate-300 bg-slate-50/40" },
+  entrevista_rh: { dot: "bg-emerald-500", countBg: "bg-emerald-100 text-emerald-700", border: "border-emerald-300 bg-emerald-50/40" },
+  entrevista_tecnica: { dot: "bg-blue-500", countBg: "bg-blue-100 text-blue-700", border: "border-blue-300 bg-blue-50/40" },
+  proposta: { dot: "bg-amber-500", countBg: "bg-amber-100 text-amber-700", border: "border-amber-300 bg-amber-50/40" },
+  contratado: { dot: "bg-emerald-600", countBg: "bg-emerald-100 text-emerald-800", border: "border-emerald-400 bg-emerald-50/40" },
+  reprovado: { dot: "bg-rose-500", countBg: "bg-rose-100 text-rose-700", border: "border-rose-300 bg-rose-50/40" },
+};
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -74,71 +109,52 @@ function getStatusLabel(status: string) {
   }
 }
 
-function getSeniorityLabel(s: string) {
-  const map: Record<string, string> = { junior: "Júnior", pleno: "Pleno", senior: "Sênior", especialista: "Especialista", gerente: "Gerente", diretor: "Diretor" };
+function getSourceLabel(s: string) {
+  const map: Record<string, string> = { linkedin: "LinkedIn", indicacao: "Indicação", site: "Site", outro: "Outro" };
   return map[s] ?? s;
 }
 
-function getWorkModeLabel(w: string) {
-  const map: Record<string, string> = { presencial: "Presencial", hibrido: "Híbrido", remoto: "Remoto" };
-  return map[w] ?? w;
+function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
-function KanbanJobCard({ job, index }: { job: Job; index: number }) {
+function PipelineCandidateCard({ candidate, index }: { candidate: AllCandidate; index: number }) {
   return (
-    <Draggable draggableId={`job-${job.id}`} index={index}>
+    <Draggable draggableId={`cand-${candidate.id}`} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`group bg-card rounded-xl border border-border/60 p-4 transition-shadow duration-200 ${snapshot.isDragging ? "shadow-xl ring-2 ring-primary/20 rotate-1" : "shadow-sm hover:shadow-md"}`}
+          className={`group bg-card rounded-xl border border-border/60 p-3.5 transition-shadow duration-200 ${snapshot.isDragging ? "shadow-xl ring-2 ring-primary/20 rotate-1" : "shadow-sm hover:shadow-md"}`}
         >
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2.5">
             <div
               {...provided.dragHandleProps}
-              className="mt-0.5 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing shrink-0"
+              className="mt-1 opacity-0 group-hover:opacity-50 transition-opacity cursor-grab active:cursor-grabbing shrink-0"
             >
-              <GripVertical className="w-4 h-4 text-muted-foreground" />
+              <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
+
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-[10px] font-bold text-primary">{getInitials(candidate.name)}</span>
+            </div>
+
             <div className="flex-1 min-w-0">
-              <Link href={`/vagas/${job.id}`}>
-                <h4 className="text-sm font-semibold text-foreground leading-snug hover:text-primary transition-colors cursor-pointer line-clamp-2">
-                  {job.title}
-                </h4>
+              <p className="text-sm font-semibold text-foreground leading-snug truncate">{candidate.name}</p>
+              <Link href={`/vagas/${candidate.jobId}`}>
+                <p className="text-xs text-primary/80 hover:text-primary hover:underline truncate cursor-pointer mt-0.5">{candidate.jobTitle}</p>
               </Link>
-              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-                <Building2 className="w-3 h-3 shrink-0" />
-                <span className="truncate">{job.departmentName}</span>
-                <span className="text-border">|</span>
-                <span className="shrink-0">{getSeniorityLabel(job.seniority)}</span>
-              </div>
             </div>
           </div>
 
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/60 rounded-md px-2 py-0.5">
-              <MapPin className="w-3 h-3" />
-              {getWorkModeLabel(job.workMode)}
+          <div className="mt-2.5 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-md px-1.5 py-0.5">
+              {getSourceLabel(candidate.source)}
             </span>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/60 rounded-md px-2 py-0.5">
-              <Clock className="w-3 h-3" />
-              {job.daysOpen}d
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/60 rounded-md px-1.5 py-0.5">
+              <Clock className="w-2.5 h-2.5" />
+              {formatDistanceToNow(new Date(candidate.updatedAt), { locale: ptBR, addSuffix: false })}
             </span>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-3 h-3 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-foreground">{job.candidateCount}</span>
-              <span className="text-xs text-muted-foreground">candidatos</span>
-            </div>
-            <Link href={`/vagas/${job.id}`}>
-              <span className="text-xs font-medium text-primary hover:underline cursor-pointer inline-flex items-center gap-0.5">
-                Pipeline <ArrowRight className="w-3 h-3" />
-              </span>
-            </Link>
           </div>
         </div>
       )}
@@ -146,67 +162,92 @@ function KanbanJobCard({ job, index }: { job: Job; index: number }) {
   );
 }
 
-function KanbanView({ jobs, onStatusChange }: { jobs: Job[]; onStatusChange: (jobId: number, newStatus: string) => void }) {
+function PipelineKanbanView({
+  candidates,
+  stages,
+  searchTerm,
+  onStageChange,
+}: {
+  candidates: AllCandidate[];
+  stages: PipelineStage[];
+  searchTerm: string;
+  onStageChange: (candidateId: number, newStage: string) => void;
+}) {
+  const filtered = useMemo(() => {
+    if (!searchTerm) return candidates;
+    const q = searchTerm.toLowerCase();
+    return candidates.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.jobTitle.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+    );
+  }, [candidates, searchTerm]);
+
   const columns = useMemo(() => {
-    const cols: Record<string, Job[]> = { open: [], paused: [], closed: [] };
-    jobs.forEach((job) => {
-      if (cols[job.status]) {
-        cols[job.status].push(job);
+    const cols: Record<string, AllCandidate[]> = {};
+    stages.forEach((s) => (cols[s.name] = []));
+    filtered.forEach((c) => {
+      if (cols[c.stage] !== undefined) {
+        cols[c.stage].push(c);
       }
     });
     return cols;
-  }, [jobs]);
+  }, [filtered, stages]);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const { draggableId, destination } = result;
-    const jobId = Number(draggableId.replace("job-", ""));
-    const newStatus = destination.droppableId;
-    const job = jobs.find((j) => j.id === jobId);
-    if (job && job.status !== newStatus) {
-      onStatusChange(jobId, newStatus);
+    const candidateId = Number(result.draggableId.replace("cand-", ""));
+    const newStage = result.destination.droppableId;
+    const candidate = candidates.find((c) => c.id === candidateId);
+    if (candidate && candidate.stage !== newStage) {
+      onStageChange(candidateId, newStage);
     }
   };
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 min-h-[60vh]">
-        {STATUS_COLUMNS.map((col) => {
-          const colJobs = columns[col.key] ?? [];
-          return (
-            <div key={col.key} className={`flex flex-col rounded-2xl border-2 ${col.color} overflow-hidden`}>
-              <div className="px-4 py-3 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
-                  <h3 className="text-sm font-semibold text-foreground">{col.label}</h3>
-                </div>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${col.countBg}`}>
-                  {colJobs.length}
-                </span>
-              </div>
-              <Droppable droppableId={col.key}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`flex-1 px-3 pb-3 space-y-2.5 overflow-y-auto min-h-[120px] transition-colors duration-200 ${snapshot.isDraggingOver ? "bg-primary/5" : ""}`}
-                  >
-                    {colJobs.length === 0 && !snapshot.isDraggingOver && (
-                      <div className="flex flex-col items-center justify-center py-10 text-center">
-                        <Briefcase className="w-8 h-8 text-muted-foreground/20 mb-2" />
-                        <p className="text-xs text-muted-foreground/60">Arraste vagas para cá</p>
-                      </div>
-                    )}
-                    {colJobs.map((job, idx) => (
-                      <KanbanJobCard key={job.id} job={job} index={idx} />
-                    ))}
-                    {provided.placeholder}
+      <div className="overflow-x-auto pb-4 -mx-2 px-2">
+        <div className="flex gap-4 min-w-max">
+          {stages.map((stage) => {
+            const stageStyle = STAGE_STYLES[stage.name] ?? STAGE_STYLES.triagem;
+            const colCandidates = columns[stage.name] ?? [];
+            return (
+              <div
+                key={stage.name}
+                className={`w-[280px] shrink-0 flex flex-col rounded-2xl border-2 ${stageStyle.border} overflow-hidden max-h-[calc(100vh-220px)]`}
+              >
+                <div className="px-4 py-3 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2.5 h-2.5 rounded-full ${stageStyle.dot}`} />
+                    <h3 className="text-sm font-semibold text-foreground">{stage.label}</h3>
                   </div>
-                )}
-              </Droppable>
-            </div>
-          );
-        })}
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${stageStyle.countBg}`}>
+                    {colCandidates.length}
+                  </span>
+                </div>
+
+                <Droppable droppableId={stage.name}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`flex-1 px-2.5 pb-3 space-y-2 overflow-y-auto min-h-[100px] transition-colors duration-200 ${snapshot.isDraggingOver ? "bg-primary/5" : ""}`}
+                    >
+                      {colCandidates.length === 0 && !snapshot.isDraggingOver && (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <Users className="w-6 h-6 text-muted-foreground/20 mb-1.5" />
+                          <p className="text-[11px] text-muted-foreground/50">Arraste candidatos para cá</p>
+                        </div>
+                      )}
+                      {colCandidates.map((c, idx) => (
+                        <PipelineCandidateCard key={c.id} candidate={c} index={idx} />
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </DragDropContext>
   );
@@ -274,11 +315,15 @@ export default function Jobs() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
-  
-  const { data: jobs, isLoading } = useListJobs();
+
+  const { data: jobs, isLoading: jobsLoading } = useListJobs();
   const { data: departments } = useListDepartments();
+  const { data: allCandidates, isLoading: candidatesLoading } = useAllCandidates();
+  const { data: stagesData } = useListPipelineStages();
+  const stages = stagesData && stagesData.length > 0 ? stagesData : FALLBACK_STAGES;
+
   const createJobMutation = useCreateJob();
-  const updateJobMutation = useUpdateJob();
+  const updateCandidateMutation = useUpdateCandidate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -307,20 +352,21 @@ export default function Jobs() {
     });
   };
 
-  const handleStatusChange = (jobId: number, newStatus: string) => {
-    queryClient.setQueryData<Job[]>(['/api/jobs'], (old) =>
-      old?.map((j) => (j.id === jobId ? { ...j, status: newStatus as Job["status"] } : j))
+  const handleCandidateStageChange = (candidateId: number, newStage: string) => {
+    queryClient.setQueryData<AllCandidate[]>(["/api/candidates/all"], (old) =>
+      old?.map((c) => (c.id === candidateId ? { ...c, stage: newStage, updatedAt: new Date().toISOString() } : c))
     );
-    updateJobMutation.mutate(
-      { id: jobId, data: { status: newStatus as Job["status"] } },
+    updateCandidateMutation.mutate(
+      { id: candidateId, data: { stage: newStage } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
-          toast({ title: "Status da vaga atualizado!" });
+          queryClient.invalidateQueries({ queryKey: ["/api/candidates/all"] });
+          queryClient.invalidateQueries({ predicate: (q) => (q.queryKey[0] as string)?.startsWith("/api/metrics") });
+          toast({ title: "Etapa do candidato atualizada!" });
         },
         onError: () => {
-          queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
-          toast({ title: "Erro ao atualizar status", variant: "destructive" });
+          queryClient.invalidateQueries({ queryKey: ["/api/candidates/all"] });
+          toast({ title: "Erro ao atualizar etapa", variant: "destructive" });
         },
       }
     );
@@ -328,16 +374,17 @@ export default function Jobs() {
 
   const filteredJobs = useMemo(() => {
     return jobs?.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             job.departmentName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || job.status === statusFilter;
       return matchesSearch && matchesStatus;
     }) ?? [];
   }, [jobs, searchTerm, statusFilter]);
 
+  const totalCandidates = allCandidates?.length ?? 0;
   const totalOpen = jobs?.filter(j => j.status === "open").length ?? 0;
-  const totalPaused = jobs?.filter(j => j.status === "paused").length ?? 0;
-  const totalClosed = jobs?.filter(j => j.status === "closed").length ?? 0;
+
+  const isLoading = viewMode === "kanban" ? candidatesLoading : jobsLoading;
 
   return (
     <div className="space-y-5">
@@ -345,16 +392,13 @@ export default function Jobs() {
         <div>
           <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">Gestão de Vagas</h1>
           <p className="text-muted-foreground mt-1">
-            {totalOpen + totalPaused + totalClosed} vagas
+            {totalOpen} vagas abertas
             <span className="mx-1.5 text-border">•</span>
-            <span className="text-emerald-600 font-medium">{totalOpen} abertas</span>
-            <span className="mx-1.5 text-border">•</span>
-            <span className="text-amber-600 font-medium">{totalPaused} pausadas</span>
-            <span className="mx-1.5 text-border">•</span>
-            <span className="text-slate-500 font-medium">{totalClosed} fechadas</span>
+            <span className="font-medium text-foreground">{totalCandidates} candidatos</span>
+            {" "}no pipeline
           </p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-11 btn-fluid">
@@ -369,7 +413,7 @@ export default function Jobs() {
                 Preencha as informações para abrir uma nova oportunidade.
               </DialogDescription>
             </div>
-            
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-5">
                 <div className="grid grid-cols-2 gap-5">
@@ -380,7 +424,7 @@ export default function Jobs() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  
+
                   <FormField control={form.control} name="departmentId" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Departamento</FormLabel>
@@ -473,7 +517,7 @@ export default function Jobs() {
                     <FormMessage />
                   </FormItem>
                 )} />
-                
+
                 <DialogFooter className="pt-4 border-t border-border">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">Cancelar</Button>
                   <Button type="submit" disabled={createJobMutation.isPending} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
@@ -489,7 +533,7 @@ export default function Jobs() {
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <div className="flex bg-card border border-border rounded-xl p-1 shrink-0">
           <button
-            onClick={() => { setViewMode("kanban"); setStatusFilter("all"); }}
+            onClick={() => setViewMode("kanban")}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === "kanban" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
           >
             <Kanban className="w-4 h-4" />
@@ -507,8 +551,8 @@ export default function Jobs() {
         <div className="flex flex-1 gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar por título ou departamento..." 
+            <Input
+              placeholder={viewMode === "kanban" ? "Buscar candidato, vaga ou email..." : "Buscar por título ou departamento..."}
               className="pl-9 h-10 bg-card rounded-xl border-border focus-visible:ring-primary/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -532,12 +576,12 @@ export default function Jobs() {
 
       {isLoading ? (
         viewMode === "kanban" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl border-2 border-border p-4 space-y-3">
-                <Skeleton className="h-6 w-24 rounded-lg" />
-                <Skeleton className="h-28 rounded-xl" />
-                <Skeleton className="h-28 rounded-xl" />
+          <div className="flex gap-4 overflow-hidden">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="w-[280px] shrink-0 rounded-2xl border-2 border-border p-4 space-y-3">
+                <Skeleton className="h-6 w-28 rounded-lg" />
+                <Skeleton className="h-24 rounded-xl" />
+                <Skeleton className="h-24 rounded-xl" />
               </div>
             ))}
           </div>
@@ -546,14 +590,27 @@ export default function Jobs() {
             {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-64 rounded-2xl" />)}
           </div>
         )
+      ) : viewMode === "kanban" ? (
+        allCandidates && allCandidates.length === 0 ? (
+          <div className="text-center py-20 bg-card rounded-3xl border border-dashed border-border flex flex-col items-center">
+            <Users className="w-16 h-16 text-muted-foreground/30 mb-4" />
+            <h3 className="text-xl font-display font-semibold text-foreground">Nenhum candidato no pipeline</h3>
+            <p className="text-muted-foreground mt-2 max-w-md">Adicione candidatos às suas vagas para vê-los aqui no Kanban.</p>
+          </div>
+        ) : (
+          <PipelineKanbanView
+            candidates={allCandidates ?? []}
+            stages={stages}
+            searchTerm={searchTerm}
+            onStageChange={handleCandidateStageChange}
+          />
+        )
       ) : filteredJobs.length === 0 ? (
         <div className="text-center py-20 bg-card rounded-3xl border border-dashed border-border flex flex-col items-center">
           <Briefcase className="w-16 h-16 text-muted-foreground/30 mb-4" />
           <h3 className="text-xl font-display font-semibold text-foreground">Nenhuma vaga encontrada</h3>
           <p className="text-muted-foreground mt-2 max-w-md">Tente ajustar seus filtros de busca ou crie uma nova vaga para começar a receber candidatos.</p>
         </div>
-      ) : viewMode === "kanban" ? (
-        <KanbanView jobs={filteredJobs} onStatusChange={handleStatusChange} />
       ) : (
         <CardsView jobs={filteredJobs} />
       )}

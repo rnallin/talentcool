@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, candidatesTable, pipelineStagesTable } from "@workspace/db";
+import { db, candidatesTable, pipelineStagesTable, jobsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateCandidateBody, UpdateCandidateBody } from "@workspace/api-zod";
 
@@ -24,6 +24,47 @@ function candidateToResponse(c: typeof candidatesTable.$inferSelect) {
     notes: c.notes ?? null,
   };
 }
+
+router.get("/candidates/all", async (req, res) => {
+  try {
+    const rows = await db
+      .select({
+        id: candidatesTable.id,
+        jobId: candidatesTable.jobId,
+        name: candidatesTable.name,
+        email: candidatesTable.email,
+        phone: candidatesTable.phone,
+        stage: candidatesTable.stage,
+        source: candidatesTable.source,
+        appliedAt: candidatesTable.appliedAt,
+        updatedAt: candidatesTable.updatedAt,
+        notes: candidatesTable.notes,
+        jobTitle: jobsTable.title,
+      })
+      .from(candidatesTable)
+      .innerJoin(jobsTable, eq(candidatesTable.jobId, jobsTable.id))
+      .orderBy(candidatesTable.updatedAt);
+
+    res.json(
+      rows.map((r) => ({
+        id: r.id,
+        jobId: r.jobId,
+        name: r.name,
+        email: r.email,
+        phone: r.phone ?? null,
+        stage: r.stage,
+        source: r.source,
+        appliedAt: r.appliedAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        notes: r.notes ?? null,
+        jobTitle: r.jobTitle,
+      }))
+    );
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.get("/jobs/:id/candidates", async (req, res) => {
   try {
