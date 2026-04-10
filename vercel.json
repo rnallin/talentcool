@@ -1,8 +1,14 @@
 {
-  "buildCommand": "cd artifacts/hr-platform && PORT=5173 BASE_PATH=/ npx vite build",
+  "installCommand": "corepack enable && pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm run --filter @workspace/hr-platform build",
   "outputDirectory": "artifacts/hr-platform/dist/public",
-  "installCommand": "pnpm install --no-frozen-lockfile",
   "framework": null,
+  "build": {
+    "env": {
+      "PORT": "5173",
+      "BASE_PATH": "/"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
